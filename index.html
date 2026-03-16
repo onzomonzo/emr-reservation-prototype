@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR 진료 화면 - 예약처방 프로토타입</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #F8F9FA; color: #374151; font-size: 12px; }
+
+.page-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+/* === Top Header === */
+.top-header { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 16px; background: #fff; border-bottom: 1px solid #E5E7EB; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-left .title { font-size: 16px; font-weight: 700; color: #111827; }
+.header-left .chart-num, .header-left .patient-name { font-size: 14px; font-weight: 600; color: #111827; }
+.header-left .patient-info, .header-left .patient-id { font-size: 12px; color: #6B7280; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.tag-success { background: #D1FAE5; color: #065F46; }
+.tag-info { background: #DBEAFE; color: #1E40AF; }
+.top-tabs { display: flex; gap: 0; margin-left: 16px; }
+.top-tab { padding: 8px 16px; font-size: 12px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; }
+.top-tab.active { color: #7C3AED; font-weight: 600; border-bottom-color: #7C3AED; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; }
+
+/* === Footer Bar === */
+.footer-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-top: 1px solid #E5E7EB; background: #fff; }
+.footer-left { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #6B7280; }
+.footer-left .footer-btn { padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; cursor: pointer; font-size: 11px; color: #374151; }
+.footer-left .footer-btn:hover { background: #F3F4F6; }
+.footer-left .badge-tab { position: relative; }
+.footer-left .badge-tab .badge-count { position: absolute; top: -6px; right: -8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+.footer-right { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+.footer-right .total-label { color: #6B7280; }
+.footer-right .total-amount { font-weight: 700; color: #111827; }
+.footer-right .btn-action { padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
+.btn-cancel { background: #FEE2E2; color: #DC2626; }
+.btn-cancel:hover { background: #FECACA; }
+.btn-partial { background: #DBEAFE; color: #2563EB; }
+.btn-partial:hover { background: #BFDBFE; }
+.btn-complete { background: #7C3AED; color: #fff; }
+.btn-complete:hover { background: #6D28D9; }
+
+/* === Content Area === */
+.content-area { display: flex; flex: 1; min-height: 0; }
+.column { display: flex; flex-direction: column; gap: 8px; padding: 8px; border-right: 1px solid #E5E7EB; background: #F8F9FA; }
+.column-1 { width: 360px; }
+.column-2 { flex: 1; display: flex; flex-direction: column; }
+.column-3 { width: 320px; }
+.column-4 { width: 260px; }
+
+.card { background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
+.card.flex-1 { flex: 1; }
+.card-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600; font-size: 12px; color: #111827; }
+.card-body { flex: 1; overflow-y: auto; }
+
+/* Patient Summary */
+.patient-summary { height: 200px; }
+.patient-summary .card-body { padding: 12px; }
+.summary-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 11px; }
+.summary-label { color: #6B7280; width: 70px; flex-shrink: 0; }
+.summary-value { color: #374151; }
+
+/* Visit History */
+.visit-item { display: flex; align-items: center; padding: 6px 12px; font-size: 11px; border-bottom: 1px solid #F3F4F6; cursor: pointer; }
+.visit-item:hover { background: #F9FAFB; }
+.visit-item.selected { background: #F3E8FF; }
+.visit-date { width: 80px; color: #374151; }
+.visit-dept { width: 50px; color: #6B7280; }
+.visit-doctor { color: #6B7280; }
+
+/* === Prescription Table === */
+.data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.data-table th { background: #F8F9FA; padding: 6px 8px; text-align: left; font-weight: 500; color: #6B7280; border-bottom: 1px solid #E5E7EB; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+.data-table td { padding: 4px 8px; border-bottom: 1px solid #F3F4F6; color: #374151; white-space: nowrap; }
+.data-table tr:hover { background: #F9FAFB; }
+.data-table tr.selected { background: #EDE9FE; }
+.data-table tr.today-reservation { background: #FFF7ED; }
+.data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
+
+.rx-icon { text-align: center; width: 24px; }
+.tri-icon { font-size: 8px; color: #F59E0B; }
+.reservation-icon { font-size: 10px; color: #F97316; }
+
+/* Section separator */
+.section-sep { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #F8F9FA; border-bottom: 1px solid #E5E7EB; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; font-weight: 500; }
+.section-sep::after { content: ''; flex: 1; height: 1px; background: #E5E7EB; }
+
+/* Future reservation rows */
+.future-rx-row { opacity: 0.7; }
+.future-rx-row:hover { opacity: 1; }
+.drag-handle { cursor: grab; color: #D1D5DB; font-size: 12px; }
+.drag-handle:hover { color: #9CA3AF; }
+
+/* === Bottom Tabs === */
+.bottom-tabs-area { border-top: 1px solid #E5E7EB; background: #fff; display: flex; flex-direction: column; }
+.bottom-tab-bar { display: flex; align-items: center; gap: 0; border-bottom: 1px solid #E5E7EB; padding: 0 8px; }
+.bottom-tab { padding: 8px 14px; font-size: 11px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; position: relative; }
+.bottom-tab:hover { color: #374151; background: #F9FAFB; }
+.bottom-tab.active { color: #7C3AED; font-weight: 600; border-bottom-color: #7C3AED; }
+.bottom-tab .tab-badge-count { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 700; margin-left: 4px; }
+.bottom-tab-content { display: none; flex: 1; min-height: 0; overflow: auto; }
+.bottom-tab-content.active { display: flex; flex-direction: column; }
+
+/* === Reservation Tab Content === */
+.reservation-list { flex: 1; overflow-y: auto; }
+.reservation-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px solid #E5E7EB; }
+.reservation-toolbar .spacer { flex: 1; }
+.btn-delete { padding: 4px 12px; border: 1px solid #FCA5A5; background: #FEF2F2; color: #DC2626; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; }
+.btn-delete:hover { background: #FEE2E2; }
+.reservation-search { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-top: 1px solid #E5E7EB; }
+.reservation-search label { font-size: 11px; color: #6B7280; white-space: nowrap; }
+.reservation-search input { height: 28px; flex: 1; padding: 4px 8px; border: 1px solid #E5E7EB; border-radius: 4px; font-size: 11px; outline: none; font-family: inherit; }
+.reservation-search input:focus { border-color: #7C3AED; }
+.date-cell { color: #7C3AED; cursor: pointer; text-decoration: underline; font-weight: 500; }
+.date-cell:hover { color: #6D28D9; }
+.date-cell.no-date { color: #9CA3AF; text-decoration: none; font-weight: 400; }
+
+/* === Calendar Dropdown === */
+.calendar-dropdown { display: none; position: absolute; z-index: 2000; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 300px; }
+.calendar-dropdown.open { display: block; }
+.cal-quick-btns { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; }
+.cal-quick-btn { padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; font-size: 10px; cursor: pointer; color: #374151; white-space: nowrap; }
+.cal-quick-btn:hover { background: #F3F4F6; }
+.cal-quick-btn.active { background: #7C3AED; color: #fff; border-color: #7C3AED; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; }
+.cal-header .cal-nav { background: none; border: none; cursor: pointer; font-size: 16px; color: #6B7280; padding: 4px; }
+.cal-header .cal-nav:hover { color: #111827; }
+.cal-header .cal-title { font-size: 13px; font-weight: 600; color: #111827; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0 10px 10px; }
+.cal-day-header { text-align: center; font-size: 10px; color: #9CA3AF; padding: 4px 0; font-weight: 500; }
+.cal-day { text-align: center; padding: 6px 0; font-size: 11px; border-radius: 4px; cursor: pointer; color: #374151; }
+.cal-day:hover { background: #F3F4F6; }
+.cal-day.today { background: #EDE9FE; color: #7C3AED; font-weight: 700; }
+.cal-day.selected { background: #7C3AED; color: #fff; }
+.cal-day.disabled { color: #D1D5DB; cursor: not-allowed; }
+.cal-day.disabled:hover { background: transparent; }
+.cal-day.holiday { color: #EF4444; }
+.cal-day.holiday.disabled { color: #FCA5A5; }
+
+/* === Context Menu === */
+.ctx-menu { display: none; position: fixed; z-index: 5000; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; padding: 4px 0; }
+.ctx-menu.open { display: block; }
+.ctx-menu-item { display: flex; align-items: center; gap: 8px; padding: 6px 14px; font-size: 11px; color: #374151; cursor: pointer; white-space: nowrap; }
+.ctx-menu-item:hover { background: #F3F4F6; }
+.ctx-menu-item.danger { color: #EF4444; }
+.ctx-menu-item .ctx-icon { width: 14px; text-align: center; font-size: 12px; }
+.ctx-sep { border-top: 1px solid #E5E7EB; margin: 2px 0; }
+.ctx-menu-item.reservation-item { color: #EA580C; font-weight: 500; }
+
+/* === Column 4 === */
+.symptoms-card { height: 200px; }
+.textarea-field { width: 100%; border: 1px solid #E5E7EB; border-radius: 4px; background: #F8F9FA; padding: 8px; font-size: 11px; resize: none; font-family: inherit; color: #374151; outline: none; }
+.textarea-field:focus { border-color: #7C3AED; }
+.tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag-small { padding: 4px 8px; background: #F8F9FA; border: 1px solid #E5E7EB; border-radius: 4px; font-size: 10px; color: #374151; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* Search bar */
+.search-bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; }
+.search-bar label { font-size: 11px; color: #6B7280; white-space: nowrap; }
+.search-input { height: 28px; padding: 4px 8px; border: 1px solid #E5E7EB; border-radius: 4px; font-size: 11px; width: 200px; outline: none; font-family: inherit; }
+.search-input:focus { border-color: #7C3AED; }
+
+/* Section table */
+.section-table { border: 1px solid #E5E7EB; border-radius: 4px; overflow: hidden; }
+.section-table.flex-1 { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+/* Rx table wrapper */
+.rx-table-wrapper { flex: 1; overflow-y: auto; position: relative; }
+
+/* Bundle */
+.bp-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #E5E7EB; }
+.bp-title { font-size: 13px; font-weight: 700; color: #111827; flex: 1; }
+.icon-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; border: none; background: none; font-size: 14px; border-radius: 4px; }
+.icon-btn:hover { background: #F3F4F6; color: #111827; }
+.bp-list { flex: 1; overflow-y: auto; padding: 8px; }
+.bp-item { padding: 5px 10px; font-size: 11px; color: #374151; cursor: pointer; border-radius: 4px; margin-bottom: 2px; }
+.bp-item:hover { background: #F3F4F6; }
+.bp-item.selected { background: #F3E8FF; color: #7C3AED; font-weight: 500; }
+
+/* Toast notification */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.toast.show { display: block; animation: toastIn 0.3s ease-out; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* Bottom tab fixed height */
+.bottom-tabs-area { height: 240px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+<!-- Top Header -->
+<div class="top-header">
+  <div class="header-left">
+    <span class="title">진료</span>
+    <span class="chart-num">2398</span>
+    <span class="patient-name">테스트2</span>
+    <span class="patient-info">(남/52)</span>
+    <span class="patient-id">740112-1000002</span>
+    <span class="tag tag-success">재진</span>
+    <span class="tag tag-info">공단</span>
+    <div class="top-tabs">
+      <div class="top-tab active">진료</div>
+      <div class="top-tab">처방</div>
+      <div class="top-tab">검사</div>
+      <div class="top-tab">서식</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="online-dot"></span>
+    <span style="font-size:12px;color:#374151;">doctor 카야</span>
+  </div>
+</div>
+
+<!-- Content Area -->
+<div class="content-area">
+  <!-- Column 1 -->
+  <div class="column column-1">
+    <div class="card patient-summary">
+      <div class="card-header">환자 진료이력 요약</div>
+      <div class="card-body">
+        <div class="summary-row"><span class="summary-label">주요 상병</span><span class="summary-value">본태성 고혈압, 2형 당뇨병</span></div>
+        <div class="summary-row"><span class="summary-label">알레르기</span><span class="summary-value" style="color:#EF4444;">페니실린, 아스피린</span></div>
+        <div class="summary-row"><span class="summary-label">최근 내원</span><span class="summary-value">2026-03-04 (내과)</span></div>
+        <div class="summary-row"><span class="summary-label">투약중</span><span class="summary-value">아모잘탄정, 메트포르민</span></div>
+        <div class="summary-row"><span class="summary-label">특이사항</span><span class="summary-value">-</span></div>
+      </div>
+    </div>
+    <div class="card flex-1">
+      <div class="card-header">내원이력</div>
+      <div class="card-body">
+        <div class="visit-item selected"><span class="visit-date">2026-03-16</span><span class="visit-dept">내과</span><span class="visit-doctor">카야</span></div>
+        <div class="visit-item"><span class="visit-date">2026-03-04</span><span class="visit-dept">내과</span><span class="visit-doctor">카야</span></div>
+        <div class="visit-item"><span class="visit-date">2026-02-15</span><span class="visit-dept">내과</span><span class="visit-doctor">카야</span></div>
+        <div class="visit-item"><span class="visit-date">2026-01-20</span><span class="visit-dept">내과</span><span class="visit-doctor">카야</span></div>
+        <div class="visit-item"><span class="visit-date">2025-12-10</span><span class="visit-dept">피부과</span><span class="visit-doctor">이민수</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column 2: Main Prescription Area -->
+  <div class="column column-2" style="padding:0;gap:0;">
+    <div style="flex:1;display:flex;flex-direction:column;min-height:0;padding:8px;gap:8px;">
+      <!-- Diagnosis -->
+      <div class="section-table" style="max-height:100px;">
+        <table class="data-table"><thead><tr>
+          <th style="width:30px;">순</th><th style="width:70px;">상병코드</th><th>명칭</th><th style="width:30px;">의증</th><th style="width:30px;">배제</th>
+        </tr></thead><tbody>
+          <tr><td>1</td><td>I10</td><td>본태성 고혈압</td><td></td><td></td></tr>
+          <tr><td>2</td><td>E11</td><td>2형 당뇨병</td><td></td><td></td></tr>
+        </tbody></table>
+      </div>
+      <div class="search-bar" style="padding:2px 0;"><label>상병 검색</label><input type="text" class="search-input" placeholder="상병코드 또는 명칭"></div>
+
+      <!-- Main Rx Table -->
+      <div class="section-table flex-1" style="position:relative;">
+        <div class="rx-table-wrapper">
+          <table class="data-table" id="mainRxTable"><thead><tr>
+            <th style="width:24px;"></th><th style="width:60px;">코드</th><th style="min-width:160px;">명칭</th>
+            <th style="width:36px;">용량</th><th style="width:36px;">일투</th><th style="width:36px;">일수</th>
+            <th style="width:36px;">용법</th><th style="width:40px;">예외</th><th style="width:36px;">청구</th>
+          </tr></thead>
+          <tbody id="rxBody">
+          </tbody></table>
+        </div>
+      </div>
+      <div class="search-bar" style="padding:2px 0;"><label>처방 검색</label><input type="text" class="search-input" placeholder="코드 또는 명칭"></div>
+    </div>
+
+    <!-- Bottom Tabs Area -->
+    <div class="bottom-tabs-area">
+      <div class="bottom-tab-bar">
+        <div class="bottom-tab" onclick="switchBottomTab('orders')" id="btab-orders">조제내요</div>
+        <div class="bottom-tab" onclick="switchBottomTab('reservation')" id="btab-reservation">예약처방 <span class="tab-badge-count" id="reservationBadge">4</span></div>
+        <div class="bottom-tab" onclick="switchBottomTab('special')" id="btab-special">특정내역</div>
+        <div class="bottom-tab" onclick="switchBottomTab('memo')" id="btab-memo">예약메모</div>
+      </div>
+
+      <!-- Reservation Tab Content -->
+      <div class="bottom-tab-content" id="btcontent-reservation">
+        <div class="reservation-toolbar">
+          <span style="font-size:11px;font-weight:600;color:#111827;">전체 예약처방</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:4px;" id="reservationCount">4건</span>
+          <div class="spacer"></div>
+          <button class="btn-delete" onclick="deleteSelectedReservation()">삭제</button>
+        </div>
+        <div class="reservation-list">
+          <table class="data-table" id="reservationTable"><thead><tr>
+            <th style="width:28px;"><input type="checkbox" id="resCheckAll" onchange="toggleAllResCheck(this)"></th>
+            <th style="width:70px;">수행일</th><th style="width:70px;">사용자코드</th><th style="min-width:140px;">명칭</th>
+            <th style="width:36px;">용량</th><th style="width:36px;">일투</th><th style="width:36px;">일수</th>
+            <th style="width:50px;">보험가</th><th style="width:50px;">일반가</th><th style="width:70px;">등록일</th><th style="width:50px;">등록자</th>
+          </tr></thead>
+          <tbody id="resBody"></tbody></table>
+        </div>
+        <div class="reservation-search">
+          <label>처방 검색</label>
+          <input type="text" placeholder="코드 또는 명칭으로 검색하여 예약처방 추가" id="resSearchInput" onkeydown="if(event.key==='Enter')addFromSearch()">
+        </div>
+      </div>
+
+      <!-- Other tabs placeholder -->
+      <div class="bottom-tab-content active" id="btcontent-orders">
+        <div style="padding:12px;color:#9CA3AF;font-size:11px;">조제내요 내용이 표시됩니다.</div>
+      </div>
+      <div class="bottom-tab-content" id="btcontent-special">
+        <div style="padding:12px;color:#9CA3AF;font-size:11px;">특정내역 내용이 표시됩니다.</div>
+      </div>
+      <div class="bottom-tab-content" id="btcontent-memo">
+        <div style="padding:12px;color:#9CA3AF;font-size:11px;">예약메모 입력란입니다. 예약메모 입력란의 내용은 통합으로도 나올 것</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column 3: Bundle Prescription -->
+  <div class="column column-3">
+    <div class="card flex-1">
+      <div class="bp-header">
+        <span class="bp-title">묶음처방</span>
+        <button class="icon-btn" title="설정">⚙</button>
+        <button class="icon-btn" title="추가">+</button>
+      </div>
+      <div class="bp-list">
+        <div class="bp-item selected">영양 수액 SET</div>
+        <div class="bp-item">고혈압 기본 처방</div>
+        <div class="bp-item">당뇨 기본 처방</div>
+        <div class="bp-item">감기 처방</div>
+        <div class="bp-item">소화기 처방</div>
+        <div class="bp-item">피부 외용제</div>
+        <div class="bp-item">통증 관리</div>
+        <div class="bp-item">비타민 SET</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column 4: Symptoms & Memo -->
+  <div class="column column-4">
+    <div class="card symptoms-card">
+      <div class="card-header">증상</div>
+      <div class="card-body" style="padding:12px;">
+        <textarea class="textarea-field" rows="3" placeholder="증상 입력"></textarea>
+        <div class="tag-row" style="margin-top:8px;">
+          <span class="tag-small">복통</span>
+          <span class="tag-small">위염</span>
+        </div>
+      </div>
+    </div>
+    <div class="card flex-1">
+      <div class="card-header">
+        <span>메모</span>
+        <div style="flex:1"></div>
+        <span style="font-size:10px;color:#9CA3AF;">⋯</span>
+      </div>
+      <div class="card-body" style="padding:12px;">
+        <textarea class="textarea-field" rows="6" placeholder="메모 입력"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Bar -->
+<div class="footer-bar">
+  <div class="footer-left">
+    <span class="footer-btn">초진</span>
+    <span class="footer-btn">청구</span>
+    <span class="footer-btn">추간</span>
+    <span class="footer-btn">외래치료종결 ▾</span>
+  </div>
+  <div class="footer-right">
+    <span class="btn-action btn-cancel">작성취소</span>
+    <span class="btn-action btn-partial">보류상태로</span>
+    <span class="btn-action btn-complete">수납실로</span>
+    <span class="total-label">총 진료비</span>
+    <span class="total-amount">83,000원</span>
+    <span style="font-size:11px;color:#6B7280;">본인부담금 24,000원</span>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<!-- Calendar Dropdown -->
+<div class="calendar-dropdown" id="calDropdown">
+  <div class="cal-quick-btns">
+    <button class="cal-quick-btn active" onclick="setQuickDate('next')">다음에</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(7)">1주일</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(14)">2주일</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(30)">1개월</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(60)">2개월</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(90)">3개월</button>
+    <button class="cal-quick-btn" onclick="setQuickDate(180)">6개월</button>
+  </div>
+  <div class="cal-header">
+    <button class="cal-nav" onclick="calNavMonth(-1)">◀</button>
+    <span class="cal-title" id="calTitle">2026년 3월</span>
+    <button class="cal-nav" onclick="calNavMonth(1)">▶</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<!-- Context Menu -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-menu-item" onclick="ctxAction('delete')"><span class="ctx-icon">✕</span> 선택삭제</div>
+  <div class="ctx-menu-item" onclick="ctxAction('deleteAll')"><span class="ctx-icon">✕</span> 전체삭제</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-menu-item" onclick="ctxAction('prn')"><span class="ctx-icon">↻</span> PRN으로 처방</div>
+  <div class="ctx-menu-item reservation-item" onclick="ctxAction('reserve')"><span class="ctx-icon">📅</span> 예약처방</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Data =====
+var today = new Date(2026, 2, 16); // 2026-03-16
+var rxData = [
+  { code: 'Bct03332', name: '혈당정량검사', dose: '1', daily: '1', days: '1', usage: '1일...', extra: '18', claim: 'M', isReservation: false, reserveDate: null },
+  { code: 'B600', name: '카보스메트정50/850mg', dose: '1', daily: '1', days: '1', usage: '가리...', extra: '원외', claim: 'M', isReservation: false, reserveDate: null },
+  { code: 'osart100', name: '오살탄점100mg', dose: '1', daily: '1', days: '1', usage: '#11', extra: '52', claim: 'M', isReservation: false, reserveDate: null },
+  { code: 'trajen', name: '트라젠타정5mg', dose: '1', daily: '1', days: '1', usage: '', extra: '20', claim: 'M', isReservation: false, reserveDate: null },
+  { code: '985145...', name: '물리치료', dose: '1', daily: '1', days: '1', usage: '#20', extra: '10', claim: 'M', isReservation: false, reserveDate: null },
+];
+
+var reservationData = [
+  { code: 'dcts23', name: '이런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: null },
+  { code: 'a1', name: '자런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: null },
+  { code: 'af12', name: '판검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '25.08.12' },
+  { code: 'asf', name: '부장검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '25.08.12' },
+];
+
+var calYear = 2026, calMonth = 2; // March (0-indexed)
+var calTargetIndex = -1;
+var ctxTargetIndex = -1;
+var selectedRes = new Set();
+
+// Hospital holidays (Sundays + specific dates)
+var holidays = ['2026-03-01'];
+
+function formatDate(d) {
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + mm + '-' + dd;
+}
+
+// ===== Render Main Rx Table =====
+function renderRxTable() {
+  var tbody = document.getElementById('rxBody');
+  tbody.innerHTML = '';
+
+  // Today's reservations at top
+  var todayStr = formatDate(today);
+  var todayReservations = reservationData.filter(function(r) { return r.performDate === todayStr.replace('2026-','26.').replace(/-/g,'.'); });
+
+  todayReservations.forEach(function(r) {
+    var tr = document.createElement('tr');
+    tr.className = 'today-reservation';
+    tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
+      '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span></td>' +
+      '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
+    tbody.appendChild(tr);
+  });
+
+  // Regular prescriptions
+  rxData.forEach(function(row, i) {
+    var tr = document.createElement('tr');
+    tr.oncontextmenu = function(e) { e.preventDefault(); showCtxMenu(e.clientX, e.clientY, i); };
+    tr.innerHTML = '<td class="rx-icon"><span class="tri-icon">▲</span></td>' +
+      '<td>' + row.code + '</td><td>' + row.name + '</td>' +
+      '<td>' + row.dose + '</td><td>' + row.daily + '</td><td>' + row.days + '</td>' +
+      '<td>' + (row.usage || '') + '</td><td>' + (row.extra || '') + '</td><td>' + (row.claim || '') + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  // Future reservations section
+  var futureRes = reservationData.filter(function(r) {
+    return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
+  });
+  if (futureRes.length > 0) {
+    var sepTr = document.createElement('tr');
+    sepTr.innerHTML = '<td colspan="9" style="padding:0;"><div class="section-sep">미래 예약처방 (' + futureRes.length + '건)</div></td>';
+    tbody.appendChild(sepTr);
+
+    futureRes.forEach(function(r) {
+      var tr = document.createElement('tr');
+      tr.className = 'future-rx-row';
+      tr.innerHTML = '<td class="rx-icon"><span class="drag-handle">⋮⋮</span></td>' +
+        '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;color:#9CA3AF;">' + r.performDate + '</span></td>' +
+        '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+// ===== Render Reservation Table =====
+function renderReservationTable() {
+  var tbody = document.getElementById('resBody');
+  tbody.innerHTML = '';
+
+  // Sort: no date first, then date ascending
+  var sorted = reservationData.slice().sort(function(a, b) {
+    if (!a.performDate && !b.performDate) return 0;
+    if (!a.performDate) return -1;
+    if (!b.performDate) return 1;
+    return a.performDate.localeCompare(b.performDate);
+  });
+
+  sorted.forEach(function(row, i) {
+    var origIdx = reservationData.indexOf(row);
+    var tr = document.createElement('tr');
+    var checked = selectedRes.has(origIdx) ? 'checked' : '';
+    var dateDisplay = row.performDate
+      ? '<span class="date-cell" onclick="openCalendar(event, ' + origIdx + ')">' + row.performDate + '</span>'
+      : '<span class="date-cell no-date" onclick="openCalendar(event, ' + origIdx + ')">-</span>';
+    tr.innerHTML = '<td><input type="checkbox" ' + checked + ' onchange="toggleResCheck(' + origIdx + ', this)"></td>' +
+      '<td>' + dateDisplay + '</td><td>' + row.code + '</td><td>' + row.name + '</td>' +
+      '<td>' + row.dose + '</td><td>' + row.daily + '</td><td>' + row.days + '</td>' +
+      '<td>' + row.insPrice + '</td><td>' + row.genPrice + '</td>' +
+      '<td>' + row.regDate + '</td><td>' + row.regBy + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('reservationBadge').textContent = reservationData.length;
+  document.getElementById('reservationCount').textContent = reservationData.length + '건';
+}
+
+// ===== Bottom Tab Switching =====
+function switchBottomTab(tab) {
+  document.querySelectorAll('.bottom-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.bottom-tab-content').forEach(function(c) { c.classList.remove('active'); });
+  document.getElementById('btab-' + tab).classList.add('active');
+  document.getElementById('btcontent-' + tab).classList.add('active');
+}
+
+// ===== Calendar =====
+function openCalendar(e, index) {
+  e.stopPropagation();
+  calTargetIndex = index;
+  var cal = document.getElementById('calDropdown');
+  var rect = e.target.getBoundingClientRect();
+  cal.style.left = rect.left + 'px';
+  cal.style.top = (rect.bottom + 4) + 'px';
+  cal.classList.add('open');
+  renderCalendar();
+}
+
+function closeCalendar() {
+  document.getElementById('calDropdown').classList.remove('open');
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = calYear + '년 ' + (calMonth + 1) + '월';
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  var dayNames = ['일','월','화','수','목','금','토'];
+  dayNames.forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'cal-day-header';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  for (var i = 0; i < firstDay; i++) {
+    var empty = document.createElement('div');
+    empty.className = 'cal-day disabled';
+    grid.appendChild(empty);
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dayEl = document.createElement('div');
+    dayEl.className = 'cal-day';
+    dayEl.textContent = d;
+    var dateObj = new Date(calYear, calMonth, d);
+    var dateStr = formatDate(dateObj);
+    var isSunday = dateObj.getDay() === 0;
+    var isHoliday = holidays.indexOf(dateStr) !== -1;
+    var isPast = dateObj < today;
+
+    if (isSunday || isHoliday) dayEl.classList.add('holiday');
+    if (isPast || isSunday) dayEl.classList.add('disabled');
+    if (dateObj.getTime() === today.getTime()) dayEl.classList.add('today');
+
+    if (!isPast && !isSunday) {
+      (function(ds, de) {
+        dayEl.onclick = function() { selectCalDate(ds); };
+      })(dateStr, dayEl);
+    }
+    grid.appendChild(dayEl);
+  }
+}
+
+function calNavMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function setQuickDate(val) {
+  document.querySelectorAll('.cal-quick-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+  if (val === 'next') {
+    // "다음에" = no date
+    if (calTargetIndex >= 0) {
+      reservationData[calTargetIndex].performDate = null;
+      closeCalendar();
+      renderReservationTable();
+      renderRxTable();
+      showToast('수행일이 "다음에"로 설정되었습니다.');
+    }
+    return;
+  }
+  var target = new Date(today);
+  target.setDate(target.getDate() + val);
+  // Skip sundays
+  while (target.getDay() === 0) target.setDate(target.getDate() + 1);
+  var dateStr = formatDate(target).substring(2).replace(/-/g, '.');
+  if (calTargetIndex >= 0) {
+    reservationData[calTargetIndex].performDate = dateStr;
+    closeCalendar();
+    renderReservationTable();
+    renderRxTable();
+    showToast('수행일이 ' + dateStr + '로 설정되었습니다.');
+  }
+}
+
+function selectCalDate(dateStr) {
+  var shortDate = dateStr.substring(2).replace(/-/g, '.');
+  if (calTargetIndex >= 0) {
+    reservationData[calTargetIndex].performDate = shortDate;
+    closeCalendar();
+    renderReservationTable();
+    renderRxTable();
+    showToast('수행일이 ' + shortDate + '로 설정되었습니다.');
+  }
+}
+
+// ===== Context Menu =====
+function showCtxMenu(x, y, index) {
+  ctxTargetIndex = index;
+  var menu = document.getElementById('ctxMenu');
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.classList.add('open');
+}
+
+function closeCtxMenu() {
+  document.getElementById('ctxMenu').classList.remove('open');
+}
+
+function ctxAction(action) {
+  closeCtxMenu();
+  if (action === 'reserve' && ctxTargetIndex >= 0) {
+    var row = rxData[ctxTargetIndex];
+    reservationData.push({
+      code: row.code, name: row.name, dose: row.dose, daily: row.daily, days: row.days,
+      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: null
+    });
+    renderReservationTable();
+    renderRxTable();
+    switchBottomTab('reservation');
+    showToast('"' + row.name + '" 예약처방이 추가되었습니다.');
+  } else if (action === 'delete' && ctxTargetIndex >= 0) {
+    rxData.splice(ctxTargetIndex, 1);
+    renderRxTable();
+    showToast('처방이 삭제되었습니다.');
+  } else if (action === 'deleteAll') {
+    rxData = [];
+    renderRxTable();
+    showToast('전체 처방이 삭제되었습니다.');
+  }
+}
+
+// ===== Reservation Selection =====
+function toggleResCheck(index, el) {
+  if (el.checked) selectedRes.add(index);
+  else selectedRes.delete(index);
+}
+function toggleAllResCheck(el) {
+  selectedRes.clear();
+  if (el.checked) {
+    reservationData.forEach(function(_, i) { selectedRes.add(i); });
+  }
+  renderReservationTable();
+}
+
+function deleteSelectedReservation() {
+  if (selectedRes.size === 0) { showToast('삭제할 항목을 선택해주세요.'); return; }
+  var indices = Array.from(selectedRes).sort(function(a,b) { return b - a; });
+  indices.forEach(function(i) { reservationData.splice(i, 1); });
+  selectedRes.clear();
+  renderReservationTable();
+  renderRxTable();
+  showToast(indices.length + '건의 예약처방이 삭제되었습니다.');
+}
+
+function addFromSearch() {
+  var input = document.getElementById('resSearchInput');
+  var val = input.value.trim();
+  if (!val) return;
+  reservationData.push({
+    code: val, name: val + ' (검색추가)', dose: '1', daily: '1', days: '1',
+    insPrice: '-', genPrice: '-', regDate: '26.03.16', regBy: '카야', performDate: null
+  });
+  input.value = '';
+  renderReservationTable();
+  renderRxTable();
+  showToast('"' + val + '" 예약처방이 추가되었습니다.');
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+// ===== Click outside to close =====
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ctx-menu') && !e.target.closest('tr')) closeCtxMenu();
+  if (!e.target.closest('.calendar-dropdown') && !e.target.closest('.date-cell')) closeCalendar();
+});
+
+// ===== Init =====
+renderRxTable();
+renderReservationTable();
+</script>
+
+</body>
+</html>
