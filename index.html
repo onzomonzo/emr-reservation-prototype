@@ -26,17 +26,18 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .header-right { display: flex; align-items: center; gap: 8px; }
 .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; }
 
-/* === Footer Bar === */
-.footer-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-top: 1px solid #E5E7EB; background: #fff; }
-.footer-left { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #6B7280; }
-.footer-left .footer-btn { padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; cursor: pointer; font-size: 11px; color: #374151; }
-.footer-left .footer-btn:hover { background: #F3F4F6; }
-.footer-left .badge-tab { position: relative; }
-.footer-left .badge-tab .badge-count { position: absolute; top: -6px; right: -8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
-.footer-right { display: flex; align-items: center; gap: 12px; font-size: 12px; }
-.footer-right .total-label { color: #6B7280; }
-.footer-right .total-amount { font-weight: 700; color: #111827; }
-.footer-right .btn-action { padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
+/* === Rx Footer (inside Column 2) === */
+.rx-footer { border-top: 1px solid #E5E7EB; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #fff; }
+.rx-action-row { display: flex; align-items: center; gap: 12px; }
+.rx-action-item { font-size: 11px; color: #6B7280; cursor: pointer; }
+.rx-action-item:hover { color: #374151; }
+.rx-price-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.rx-button-row { display: flex; align-items: center; justify-content: space-between; }
+.rx-btn-left { display: flex; align-items: center; gap: 6px; }
+.rx-btn-right { display: flex; align-items: center; gap: 6px; }
+.footer-btn { padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; cursor: pointer; font-size: 11px; color: #374151; }
+.footer-btn:hover { background: #F3F4F6; }
+.btn-action { padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
 .btn-save { background: #E5E7EB; color: #374151; }
 .btn-save:hover { background: #D1D5DB; }
 .btn-save-deliver { background: #E5E7EB; color: #374151; }
@@ -284,6 +285,35 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
         </div>
       </div>
       <div class="search-bar" style="padding:2px 0;"><label>처방 검색</label><input type="text" class="search-input" placeholder="코드 또는 명칭"></div>
+
+      <!-- Rx Footer (inside Column 2) -->
+      <div class="rx-footer">
+        <div class="rx-action-row">
+          <span class="rx-action-item">📄 조제메모</span>
+          <span class="rx-action-item" onclick="openReservationPopup()" style="cursor:pointer;">📅 예약처방</span>
+          <span class="rx-action-item">📋 특정내역</span>
+          <span class="rx-action-item">👤 환자예의</span>
+          <span class="rx-action-item">🚫 처방금지</span>
+        </div>
+        <div class="rx-price-row">
+          <span style="color:#6B7280;">💰</span>
+          <span style="font-weight:700;color:#111827;">83,000원</span>
+          <span style="color:#6B7280;">83,000원</span>
+        </div>
+        <div class="rx-button-row">
+          <div class="rx-btn-left">
+            <span class="footer-btn">재진 ▾</span>
+            <span class="footer-btn">청구 ▾</span>
+            <span class="footer-btn">주간 ▾</span>
+            <span class="footer-btn">계속 ▾</span>
+          </div>
+          <div class="rx-btn-right">
+            <span class="btn-action btn-save">저장</span>
+            <span class="btn-action btn-save-deliver">저장전달</span>
+            <span class="btn-action btn-print-deliver">출력전달</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Bottom Tabs Area -->
@@ -349,24 +379,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
         <textarea class="textarea-field" rows="6" placeholder="메모 입력"></textarea>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- Footer Bar -->
-<div class="footer-bar">
-  <div class="footer-left">
-    <span class="footer-btn">초진</span>
-    <span class="footer-btn">청구</span>
-    <span class="footer-btn">추간</span>
-    <span class="footer-btn">외래치료종결 ▾</span>
-  </div>
-  <div class="footer-right">
-    <span class="total-label">총 진료비</span>
-    <span class="total-amount">83,000원</span>
-    <span style="font-size:11px;color:#6B7280;">본인부담금 24,000원</span>
-    <span class="btn-action btn-save">저장</span>
-    <span class="btn-action btn-save-deliver">저장전달</span>
-    <span class="btn-action btn-print-deliver">출력전달</span>
   </div>
 </div>
 
