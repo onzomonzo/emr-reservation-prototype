@@ -37,12 +37,12 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .footer-right .total-label { color: #6B7280; }
 .footer-right .total-amount { font-weight: 700; color: #111827; }
 .footer-right .btn-action { padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
-.btn-cancel { background: #FEE2E2; color: #DC2626; }
-.btn-cancel:hover { background: #FECACA; }
-.btn-partial { background: #DBEAFE; color: #2563EB; }
-.btn-partial:hover { background: #BFDBFE; }
-.btn-complete { background: #7C3AED; color: #fff; }
-.btn-complete:hover { background: #6D28D9; }
+.btn-save { background: #E5E7EB; color: #374151; }
+.btn-save:hover { background: #D1D5DB; }
+.btn-save-deliver { background: #E5E7EB; color: #374151; }
+.btn-save-deliver:hover { background: #D1D5DB; }
+.btn-print-deliver { background: #3B82F6; color: #fff; }
+.btn-print-deliver:hover { background: #2563EB; }
 
 /* === Content Area === */
 .content-area { display: flex; flex: 1; min-height: 0; }
@@ -77,9 +77,12 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table th { background: #F8F9FA; padding: 6px 8px; text-align: left; font-weight: 500; color: #6B7280; border-bottom: 1px solid #E5E7EB; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
 .data-table td { padding: 4px 8px; border-bottom: 1px solid #F3F4F6; color: #374151; white-space: nowrap; }
 .data-table tr:hover { background: #F9FAFB; }
-.data-table tr.selected { background: #EDE9FE; }
+.data-table tr.selected { background: #EBF5FF; }
+.data-table tr.selected td:first-child { border-left: 3px solid #3B82F6; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
+.data-table tr.future-reservation { background: #DBEAFE; }
+.data-table tr.future-reservation td { color: #1E40AF; }
 
 .rx-icon { text-align: center; width: 24px; }
 .tri-icon { font-size: 8px; color: #F59E0B; }
@@ -89,11 +92,16 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .section-sep { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #F8F9FA; border-bottom: 1px solid #E5E7EB; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; font-weight: 500; }
 .section-sep::after { content: ''; flex: 1; height: 1px; background: #E5E7EB; }
 
-/* Future reservation rows */
-.future-rx-row { opacity: 0.7; }
-.future-rx-row:hover { opacity: 1; }
-.drag-handle { cursor: grab; color: #D1D5DB; font-size: 12px; }
-.drag-handle:hover { color: #9CA3AF; }
+/* Reservation popup modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 3000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: #fff; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 800px; max-height: 70vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #E5E7EB; }
+.modal-header h3 { font-size: 14px; font-weight: 700; color: #111827; }
+.modal-close { background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; padding: 4px 8px; }
+.modal-close:hover { color: #111827; }
+.modal-body { flex: 1; overflow-y: auto; }
+.modal-footer { padding: 8px 16px; border-top: 1px solid #E5E7EB; display: flex; align-items: center; gap: 8px; }
 
 /* === Bottom Tabs === */
 .bottom-tabs-area { border-top: 1px solid #E5E7EB; background: #fff; display: flex; flex-direction: column; }
@@ -281,36 +289,11 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
     <!-- Bottom Tabs Area -->
     <div class="bottom-tabs-area">
       <div class="bottom-tab-bar">
-        <div class="bottom-tab" onclick="switchBottomTab('orders')" id="btab-orders">조제내요</div>
-        <div class="bottom-tab" onclick="switchBottomTab('reservation')" id="btab-reservation">예약처방 <span class="tab-badge-count" id="reservationBadge">4</span></div>
+        <div class="bottom-tab active" onclick="switchBottomTab('orders')" id="btab-orders">조제내요</div>
+        <div class="bottom-tab" onclick="openReservationPopup()" id="btab-reservation" style="cursor:pointer;">예약처방 <span class="tab-badge-count" id="reservationBadge">4</span></div>
         <div class="bottom-tab" onclick="switchBottomTab('special')" id="btab-special">특정내역</div>
         <div class="bottom-tab" onclick="switchBottomTab('memo')" id="btab-memo">예약메모</div>
       </div>
-
-      <!-- Reservation Tab Content -->
-      <div class="bottom-tab-content" id="btcontent-reservation">
-        <div class="reservation-toolbar">
-          <span style="font-size:11px;font-weight:600;color:#111827;">전체 예약처방</span>
-          <span style="font-size:11px;color:#9CA3AF;margin-left:4px;" id="reservationCount">4건</span>
-          <div class="spacer"></div>
-          <button class="btn-delete" onclick="deleteSelectedReservation()">삭제</button>
-        </div>
-        <div class="reservation-list">
-          <table class="data-table" id="reservationTable"><thead><tr>
-            <th style="width:28px;"><input type="checkbox" id="resCheckAll" onchange="toggleAllResCheck(this)"></th>
-            <th style="width:70px;">수행일</th><th style="width:70px;">사용자코드</th><th style="min-width:140px;">명칭</th>
-            <th style="width:36px;">용량</th><th style="width:36px;">일투</th><th style="width:36px;">일수</th>
-            <th style="width:50px;">보험가</th><th style="width:50px;">일반가</th><th style="width:70px;">등록일</th><th style="width:50px;">등록자</th>
-          </tr></thead>
-          <tbody id="resBody"></tbody></table>
-        </div>
-        <div class="reservation-search">
-          <label>처방 검색</label>
-          <input type="text" placeholder="코드 또는 명칭으로 검색하여 예약처방 추가" id="resSearchInput" onkeydown="if(event.key==='Enter')addFromSearch()">
-        </div>
-      </div>
-
-      <!-- Other tabs placeholder -->
       <div class="bottom-tab-content active" id="btcontent-orders">
         <div style="padding:12px;color:#9CA3AF;font-size:11px;">조제내요 내용이 표시됩니다.</div>
       </div>
@@ -378,16 +361,45 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
     <span class="footer-btn">외래치료종결 ▾</span>
   </div>
   <div class="footer-right">
-    <span class="btn-action btn-cancel">작성취소</span>
-    <span class="btn-action btn-partial">보류상태로</span>
-    <span class="btn-action btn-complete">수납실로</span>
     <span class="total-label">총 진료비</span>
     <span class="total-amount">83,000원</span>
     <span style="font-size:11px;color:#6B7280;">본인부담금 24,000원</span>
+    <span class="btn-action btn-save">저장</span>
+    <span class="btn-action btn-save-deliver">저장전달</span>
+    <span class="btn-action btn-print-deliver">출력전달</span>
   </div>
 </div>
 
 </div><!-- /page-wrapper -->
+
+<!-- Reservation Popup Modal -->
+<div class="modal-overlay" id="reservationModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>예약처방 <span style="font-size:12px;color:#9CA3AF;font-weight:400;margin-left:8px;" id="reservationCount">4건</span></h3>
+      <button class="modal-close" onclick="closeReservationPopup()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="reservation-toolbar">
+        <div class="spacer"></div>
+        <button class="btn-delete" onclick="deleteSelectedReservation()">삭제</button>
+      </div>
+      <div class="reservation-list">
+        <table class="data-table" id="reservationTable"><thead><tr>
+          <th style="width:28px;"><input type="checkbox" id="resCheckAll" onchange="toggleAllResCheck(this)"></th>
+          <th style="width:70px;">수행일</th><th style="width:70px;">사용자코드</th><th style="min-width:140px;">명칭</th>
+          <th style="width:36px;">용량</th><th style="width:36px;">일투</th><th style="width:36px;">일수</th>
+          <th style="width:50px;">보험가</th><th style="width:50px;">일반가</th><th style="width:70px;">등록일</th><th style="width:50px;">등록자</th>
+        </tr></thead>
+        <tbody id="resBody"></tbody></table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <label style="font-size:11px;color:#6B7280;">처방 검색</label>
+      <input type="text" class="search-input" style="flex:1;width:auto;" placeholder="코드 또는 명칭으로 검색하여 예약처방 추가" id="resSearchInput" onkeydown="if(event.key==='Enter')addFromSearch()">
+    </div>
+  </div>
+</div>
 
 <!-- Calendar Dropdown -->
 <div class="calendar-dropdown" id="calDropdown">
@@ -442,6 +454,7 @@ var calYear = 2026, calMonth = 2; // March (0-indexed)
 var calTargetIndex = -1;
 var ctxTargetIndex = -1;
 var selectedRes = new Set();
+var selectedRxIndex = 0; // default selected row
 
 // Hospital holidays (Sundays + specific dates)
 var holidays = ['2026-03-01'];
@@ -473,7 +486,9 @@ function renderRxTable() {
   // Regular prescriptions
   rxData.forEach(function(row, i) {
     var tr = document.createElement('tr');
-    tr.oncontextmenu = function(e) { e.preventDefault(); showCtxMenu(e.clientX, e.clientY, i); };
+    if (i === selectedRxIndex) tr.className = 'selected';
+    tr.onclick = function() { selectedRxIndex = i; renderRxTable(); };
+    tr.oncontextmenu = function(e) { e.preventDefault(); selectedRxIndex = i; renderRxTable(); showCtxMenu(e.clientX, e.clientY, i); };
     tr.innerHTML = '<td class="rx-icon"><span class="tri-icon">▲</span></td>' +
       '<td>' + row.code + '</td><td>' + row.name + '</td>' +
       '<td>' + row.dose + '</td><td>' + row.daily + '</td><td>' + row.days + '</td>' +
@@ -481,20 +496,16 @@ function renderRxTable() {
     tbody.appendChild(tr);
   });
 
-  // Future reservations section
+  // Future reservations (blue background, no label)
   var futureRes = reservationData.filter(function(r) {
     return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
   });
   if (futureRes.length > 0) {
-    var sepTr = document.createElement('tr');
-    sepTr.innerHTML = '<td colspan="9" style="padding:0;"><div class="section-sep">미래 예약처방 (' + futureRes.length + '건)</div></td>';
-    tbody.appendChild(sepTr);
-
     futureRes.forEach(function(r) {
       var tr = document.createElement('tr');
-      tr.className = 'future-rx-row';
-      tr.innerHTML = '<td class="rx-icon"><span class="drag-handle">⋮⋮</span></td>' +
-        '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;color:#9CA3AF;">' + r.performDate + '</span></td>' +
+      tr.className = 'future-reservation';
+      tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
+        '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;font-weight:500;">' + r.performDate + '</span></td>' +
         '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
       tbody.appendChild(tr);
     });
@@ -531,6 +542,15 @@ function renderReservationTable() {
 
   document.getElementById('reservationBadge').textContent = reservationData.length;
   document.getElementById('reservationCount').textContent = reservationData.length + '건';
+}
+
+// ===== Reservation Popup =====
+function openReservationPopup() {
+  renderReservationTable();
+  document.getElementById('reservationModal').classList.add('open');
+}
+function closeReservationPopup() {
+  document.getElementById('reservationModal').classList.remove('open');
 }
 
 // ===== Bottom Tab Switching =====
@@ -670,7 +690,7 @@ function ctxAction(action) {
     });
     renderReservationTable();
     renderRxTable();
-    switchBottomTab('reservation');
+    openReservationPopup();
     showToast('"' + row.name + '" 예약처방이 추가되었습니다.');
   } else if (action === 'delete' && ctxTargetIndex >= 0) {
     rxData.splice(ctxTargetIndex, 1);
@@ -732,6 +752,7 @@ function showToast(msg) {
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ctx-menu') && !e.target.closest('tr')) closeCtxMenu();
   if (!e.target.closest('.calendar-dropdown') && !e.target.closest('.date-cell')) closeCalendar();
+  if (e.target.classList.contains('modal-overlay')) closeReservationPopup();
 });
 
 // ===== Init =====
