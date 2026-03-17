@@ -85,6 +85,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr.nurse-reservation td { color: #854D0E; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
+.data-table tr.section-divider:hover { background: transparent; }
 .data-table tr.future-reservation { background: #DBEAFE; cursor: pointer; }
 .data-table tr.future-reservation td { color: #1E40AF; }
 .data-table tr.future-reservation.future-selected { background: #93C5FD; }
@@ -506,6 +507,17 @@ function renderRxTable() {
       '<td>' + (row.usage || '') + '</td><td>' + (row.extra || '') + '</td><td>' + (row.claim || '') + '</td>';
     tbody.appendChild(tr);
   });
+
+  // Divider between today's orders and future reservations
+  var futureResCheck = reservationData.filter(function(r) {
+    return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
+  });
+  if (futureResCheck.length > 0) {
+    var divTr = document.createElement('tr');
+    divTr.className = 'section-divider';
+    divTr.innerHTML = '<td colspan="8" style="padding:0;height:2px;background:#D1D5DB;"></td>';
+    tbody.appendChild(divTr);
+  }
 
   // Future reservations (blue background, selectable)
   var futureRes = reservationData.filter(function(r) {
