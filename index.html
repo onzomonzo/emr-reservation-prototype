@@ -61,12 +61,13 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .card-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600; font-size: 12px; color: #111827; }
 .card-body { flex: 1; overflow-y: auto; }
 
-/* Patient Summary */
-.patient-summary { height: 200px; }
-.patient-summary .card-body { padding: 12px; }
-.summary-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 11px; }
-.summary-label { color: #6B7280; width: 70px; flex-shrink: 0; }
-.summary-value { color: #374151; }
+/* Guide Card */
+.guide-card { }
+.guide-card .card-body { padding: 12px; }
+.guide-item { display: flex; gap: 10px; align-items: flex-start; }
+.guide-num { width: 24px; height: 24px; border-radius: 12px; background: #7C3AED; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.guide-text .guide-title { font-size: 12px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+.guide-text .guide-desc { font-size: 11px; color: #6B7280; line-height: 1.4; }
 
 /* Visit History */
 .visit-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
@@ -267,14 +268,25 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 <div class="content-area">
   <!-- Column 1 -->
   <div class="column column-1">
-    <div class="card patient-summary">
-      <div class="card-header">환자 진료이력 요약</div>
-      <div class="card-body">
-        <div class="summary-row"><span class="summary-label">주요 상병</span><span class="summary-value">본태성 고혈압, 2형 당뇨병</span></div>
-        <div class="summary-row"><span class="summary-label">알레르기</span><span class="summary-value" style="color:#EF4444;">페니실린, 아스피린</span></div>
-        <div class="summary-row"><span class="summary-label">최근 내원</span><span class="summary-value">2026-03-04 (내과)</span></div>
-        <div class="summary-row"><span class="summary-label">투약중</span><span class="summary-value">아모잘탄정, 메트포르민</span></div>
-        <div class="summary-row"><span class="summary-label">특이사항</span><span class="summary-value">-</span></div>
+    <div class="card guide-card">
+      <div class="card-header">가능한 기능</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="guide-item">
+          <div class="guide-num">1</div>
+          <div class="guide-text"><div class="guide-title">예약처방 등록</div><div class="guide-desc">오더 우클릭, 드래그, 팝업에서 검색</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">2</div>
+          <div class="guide-text"><div class="guide-title">예약처방을 오늘 오더로 내리기</div><div class="guide-desc">우클릭, 드래그</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">3</div>
+          <div class="guide-text"><div class="guide-title">예약처방 날짜 일괄지정</div><div class="guide-desc">여러 개 선택 후 날짜 지정</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">4</div>
+          <div class="guide-text"><div class="guide-title">저장 후 과거차트 확인</div><div class="guide-desc">저장 버튼 클릭 시 내원이력 생성</div></div>
+        </div>
       </div>
     </div>
     <div class="card flex-1">
