@@ -754,43 +754,47 @@ function calNavMonth(dir) {
   renderCalendar();
 }
 
+// Get indices to apply date to: if checked items include the clicked one, apply to all checked; otherwise just the clicked one
+function getDateTargets() {
+  if (selectedRes.size > 0 && (calTargetIndex < 0 || selectedRes.has(calTargetIndex))) {
+    return Array.from(selectedRes);
+  }
+  return calTargetIndex >= 0 ? [calTargetIndex] : [];
+}
+
 function setQuickDate(val) {
   document.querySelectorAll('.cal-quick-btn').forEach(function(b) { b.classList.remove('active'); });
   event.target.classList.add('active');
+  var targets = getDateTargets();
+  if (targets.length === 0) return;
   if (val === 'next') {
-    // "다음에" = no date
-    if (calTargetIndex >= 0) {
-      reservationData[calTargetIndex].performDate = null;
-      closeCalendar();
-      renderReservationTable();
-      renderRxTable();
-      showToast('수행일이 "다음에"로 설정되었습니다.');
-    }
+    targets.forEach(function(idx) { reservationData[idx].performDate = null; });
+    closeCalendar();
+    renderReservationTable();
+    renderRxTable();
+    showToast(targets.length > 1 ? targets.length + '건 수행일이 "다음에"로 설정되었습니다.' : '수행일이 "다음에"로 설정되었습니다.');
     return;
   }
   var target = new Date(today);
   target.setDate(target.getDate() + val);
-  // Skip sundays
   while (target.getDay() === 0) target.setDate(target.getDate() + 1);
   var dateStr = formatDate(target).substring(2).replace(/-/g, '.');
-  if (calTargetIndex >= 0) {
-    reservationData[calTargetIndex].performDate = dateStr;
-    closeCalendar();
-    renderReservationTable();
-    renderRxTable();
-    showToast('수행일이 ' + dateStr + '로 설정되었습니다.');
-  }
+  targets.forEach(function(idx) { reservationData[idx].performDate = dateStr; });
+  closeCalendar();
+  renderReservationTable();
+  renderRxTable();
+  showToast(targets.length > 1 ? targets.length + '건 수행일이 ' + dateStr + '로 일괄 설정되었습니다.' : '수행일이 ' + dateStr + '로 설정되었습니다.');
 }
 
 function selectCalDate(dateStr) {
   var shortDate = dateStr.substring(2).replace(/-/g, '.');
-  if (calTargetIndex >= 0) {
-    reservationData[calTargetIndex].performDate = shortDate;
-    closeCalendar();
-    renderReservationTable();
-    renderRxTable();
-    showToast('수행일이 ' + shortDate + '로 설정되었습니다.');
-  }
+  var targets = getDateTargets();
+  if (targets.length === 0) return;
+  targets.forEach(function(idx) { reservationData[idx].performDate = shortDate; });
+  closeCalendar();
+  renderReservationTable();
+  renderRxTable();
+  showToast(targets.length > 1 ? targets.length + '건 수행일이 ' + shortDate + '로 일괄 설정되었습니다.' : '수행일이 ' + shortDate + '로 설정되었습니다.');
 }
 
 // ===== Context Menu =====
