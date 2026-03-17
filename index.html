@@ -88,6 +88,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .visit-rx-row .rx-dose { color: #6B7280; }
 .visit-rx-row .mix-label { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px; margin-left: 2px; }
 .visit-amount { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 8px 10px; font-size: 11px; font-weight: 600; color: #111827; }
+.visit-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 100%; min-height: 200px; }
 
 /* === Prescription Table === */
 .data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -106,6 +107,16 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr.future-reservation td { color: #1E40AF; }
 .data-table tr.future-reservation.future-selected { background: #93C5FD; }
 .data-table tr.future-reservation.future-selected td:first-child { border-left: 3px solid #1E40AF; }
+
+/* Drag and drop */
+.data-table tr[draggable="true"] { cursor: grab; }
+.data-table tr[draggable="true"]:active { cursor: grabbing; }
+.data-table tr.dragging { opacity: 0.4; }
+.data-table tr.drag-over-above td { box-shadow: inset 0 2px 0 #7C3AED; }
+.data-table tr.drag-over-below td { box-shadow: inset 0 -2px 0 #7C3AED; }
+.data-table tr.drag-over-future td { box-shadow: inset 0 -2px 0 #3B82F6; background: #EFF6FF; }
+.data-table tr.drag-over-today td { box-shadow: inset 0 -2px 0 #F97316; background: #FFF7ED; }
+.section-divider.drag-highlight td { background: #7C3AED !important; height: 4px !important; }
 
 /* Future reservation context menu */
 .future-ctx { position: fixed; display: none; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 2000; min-width: 140px; padding: 4px 0; }
@@ -266,111 +277,10 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
     <div class="card flex-1">
       <div class="card-header">내원이력</div>
       <div class="card-body">
-        <div class="visit-list">
-          <!-- Today's visit - expanded -->
-          <div class="visit-card expanded">
-            <div class="visit-row">
-              <span class="v-date">26.03.16</span>
-              <span class="v-doctor">카야</span>
-              <span class="v-diag">본태성 고혈압</span>
-              <span class="v-chevron">▲</span>
-            </div>
-            <div class="visit-tags">
-              <span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">주</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>
-              <span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>
-            </div>
-            <div class="visit-expanded">
-              <div class="visit-section">
-                <div class="visit-section-header">증상</div>
-                <div class="visit-section-body" style="color:#374151;">복통, 속쓰림, 소화불량</div>
-              </div>
-              <div class="visit-section">
-                <div class="visit-section-header">진단</div>
-                <div class="visit-section-body">
-                  <div style="display:flex;gap:6px;align-items:center;padding:2px 0;"><span style="color:#2563EB;">●</span><span style="font-weight:500;">I10</span> 본태성 고혈압 (주상병)</div>
-                  <div style="display:flex;gap:6px;align-items:center;padding:2px 0;"><span style="color:#9CA3AF;">○</span><span style="font-weight:500;">E11</span> 2형 당뇨병 (부상병)</div>
-                </div>
-              </div>
-              <div class="visit-section">
-                <div class="visit-section-header">처방</div>
-                <div class="visit-section-body" style="display:flex;flex-direction:column;gap:2px;">
-                  <div class="visit-rx-row"><span style="color:#EAB308;">💉</span><span class="rx-code">ns500</span><span class="rx-name">생리식염수500ml</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#9333EA;">💉</span><span class="rx-code">lainex</span><span class="rx-name">라이넥주(태반주사)</span><span class="rx-dose">2/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#3B82F6;">💉</span><span class="rx-code">ns100</span><span class="rx-name">중외엔에스100ml</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#3B82F6;">💉</span><span class="rx-code">dw5250</span><span class="rx-name">5%포도당키트250ml</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#3B82F6;">💉</span><span class="rx-code">gcns250</span><span class="rx-name">녹십자생리식염키트250ml</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#3B82F6;">💉</span><span class="rx-code">fursul</span><span class="rx-name">푸르설타민주(마늘주사)</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#22C55E;">💉</span><span class="rx-code">gcvitao</span><span class="rx-name">지씨비타오(B5)</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#22C55E;">💉</span><span class="rx-code">megab6</span><span class="rx-name">메가비타식스(B6)</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#22C55E;">💉</span><span class="rx-code">gcvit12</span><span class="rx-name">지씨비타일이(B12)</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#22C55E;">💉</span><span class="rx-code">hisipa</span><span class="rx-name">히시파겐씨주</span><span class="rx-dose">1/1/1</span></div>
-                  <div class="visit-rx-row"><span style="color:#22C55E;">💉</span><span class="rx-code">megagr</span><span class="rx-name">메가그린(비타민C)</span><span class="rx-dose">1/1/1</span></div>
-                </div>
-              </div>
-              <div class="visit-amount">💰 38,400원</div>
-            </div>
-          </div>
-          <!-- Past visit - collapsed -->
-          <div class="visit-card">
-            <div class="visit-row">
-              <span class="v-date">26.03.04</span>
-              <span class="v-doctor">카야</span>
-              <span class="v-diag">상세불명의 복통</span>
-              <span class="v-chevron">▼</span>
-            </div>
-            <div class="visit-tags">
-              <span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">주</span>
-              <span class="visit-tag" style="background:#FEF3C7;color:#92400E;">검</span>
-              <span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>
-            </div>
-            <div class="visit-summary">복통 및 소화불량 증상으로 내원, 수액/비타민 주사 처방</div>
-          </div>
-          <!-- Older visits - collapsed -->
-          <div class="visit-card">
-            <div class="visit-row">
-              <span class="v-date">26.02.15</span>
-              <span class="v-doctor">카야</span>
-              <span class="v-diag">본태성 고혈압</span>
-              <span class="v-chevron">▼</span>
-            </div>
-            <div class="visit-tags">
-              <span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>
-              <span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>
-            </div>
-            <div class="visit-summary">고혈압/당뇨 정기 진료</div>
-          </div>
-          <div class="visit-card">
-            <div class="visit-row">
-              <span class="v-date">26.01.20</span>
-              <span class="v-doctor">카야</span>
-              <span class="v-diag">본태성 고혈압</span>
-              <span class="v-chevron">▼</span>
-            </div>
-            <div class="visit-tags">
-              <span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>
-              <span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>
-            </div>
-            <div class="visit-summary">고혈압/당뇨 정기 진료, 혈액검사</div>
-          </div>
-          <div class="visit-card">
-            <div class="visit-row">
-              <span class="v-date">25.12.10</span>
-              <span class="v-doctor">이민수</span>
-              <span class="v-diag">접촉피부염</span>
-              <span class="v-chevron">▼</span>
-            </div>
-            <div class="visit-tags">
-              <span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>
-              <span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>
-              <span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>
-            </div>
-            <div class="visit-summary">피부과 접촉피부염 진료</div>
+        <div class="visit-list" id="visitList">
+          <div class="visit-empty" id="visitEmpty">
+            <div style="font-size:24px;color:#D1D5DB;">📋</div>
+            <div style="font-size:11px;color:#9CA3AF;">저장 시 내원이력이 생성됩니다</div>
           </div>
         </div>
       </div>
@@ -427,9 +337,9 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
             <span class="footer-btn">계속 ▾</span>
           </div>
           <div class="rx-btn-right">
-            <span class="btn-action btn-save">저장</span>
-            <span class="btn-action btn-save-deliver">저장전달</span>
-            <span class="btn-action btn-print-deliver">출력전달</span>
+            <span class="btn-action btn-save" onclick="saveChart()">저장</span>
+            <span class="btn-action btn-save-deliver" onclick="saveChart()">저장전달</span>
+            <span class="btn-action btn-print-deliver" onclick="saveChart()">출력전달</span>
           </div>
         </div>
       </div>
@@ -616,6 +526,15 @@ function renderRxTable() {
     if (i === selectedRxIndex) tr.className = 'selected';
     tr.onclick = function() { selectedRxIndex = i; renderRxTable(); };
     tr.oncontextmenu = function(e) { e.preventDefault(); selectedRxIndex = i; renderRxTable(); showCtxMenu(e.clientX, e.clientY, i); };
+    // Drag and drop
+    tr.draggable = true;
+    tr.dataset.dragType = 'rx';
+    tr.dataset.dragIndex = i;
+    tr.ondragstart = function(e) { handleDragStart(e, 'rx', i); };
+    tr.ondragend = handleDragEnd;
+    tr.ondragover = function(e) { handleDragOver(e, 'rx', i); };
+    tr.ondragleave = handleDragLeave;
+    tr.ondrop = function(e) { handleDrop(e, 'rx', i); };
     var nameHtml = row.name;
     if (row.isReservation) {
       nameHtml += ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span>';
@@ -665,6 +584,15 @@ function renderRxTable() {
         }
         showFutureCtx(e.clientX, e.clientY);
       };
+      // Drag and drop for future reservations
+      tr.draggable = true;
+      tr.dataset.dragType = 'future';
+      tr.dataset.dragIndex = origIdx;
+      tr.ondragstart = function(e) { handleDragStart(e, 'future', origIdx); };
+      tr.ondragend = handleDragEnd;
+      tr.ondragover = function(e) { handleDragOver(e, 'future', origIdx); };
+      tr.ondragleave = handleDragLeave;
+      tr.ondrop = function(e) { handleDrop(e, 'future', origIdx); };
       tr.innerHTML = '<td>' + r.code + '</td><td>' + r.name + '</td>' +
         '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
       tbody.appendChild(tr);
@@ -954,6 +882,166 @@ document.addEventListener('click', function(e) {
   if (!e.target.closest('.calendar-dropdown') && !e.target.closest('.date-cell')) closeCalendar();
   if (e.target.classList.contains('modal-overlay')) closeReservationPopup();
 });
+
+// ===== Drag and Drop =====
+var dragSource = null; // { type: 'rx'|'future', index: number }
+
+function handleDragStart(e, type, index) {
+  dragSource = { type: type, index: index };
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', type + ':' + index);
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.drag-over-above,.drag-over-below,.drag-over-future,.drag-over-today').forEach(function(el) {
+    el.classList.remove('drag-over-above', 'drag-over-below', 'drag-over-future', 'drag-over-today');
+  });
+  dragSource = null;
+}
+
+function handleDragOver(e, targetType, targetIndex) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  var tr = e.currentTarget;
+  tr.classList.remove('drag-over-above', 'drag-over-below', 'drag-over-future', 'drag-over-today');
+  if (!dragSource) return;
+  // Cross-area highlight
+  if (dragSource.type === 'future' && targetType === 'rx') {
+    tr.classList.add('drag-over-today');
+  } else if (dragSource.type === 'rx' && targetType === 'future') {
+    tr.classList.add('drag-over-future');
+  } else {
+    var rect = tr.getBoundingClientRect();
+    var mid = rect.top + rect.height / 2;
+    tr.classList.add(e.clientY < mid ? 'drag-over-above' : 'drag-over-below');
+  }
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over-above', 'drag-over-below', 'drag-over-future', 'drag-over-today');
+}
+
+function handleDrop(e, targetType, targetIndex) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over-above', 'drag-over-below', 'drag-over-future', 'drag-over-today');
+  if (!dragSource) return;
+
+  var srcType = dragSource.type;
+  var srcIdx = dragSource.index;
+
+  if (srcType === 'rx' && targetType === 'rx') {
+    // Reorder within rxData
+    var rect = e.currentTarget.getBoundingClientRect();
+    var insertBefore = e.clientY < rect.top + rect.height / 2;
+    var item = rxData.splice(srcIdx, 1)[0];
+    var newIdx = srcIdx < targetIndex ? (insertBefore ? targetIndex - 1 : targetIndex) : (insertBefore ? targetIndex : targetIndex + 1);
+    rxData.splice(newIdx, 0, item);
+    selectedRxIndex = newIdx;
+    showToast('처방 순서가 변경되었습니다.');
+  } else if (srcType === 'rx' && targetType === 'future') {
+    // Move from today orders to future reservations (convert to reservation)
+    var row = rxData.splice(srcIdx, 1)[0];
+    reservationData.push({
+      code: row.code, name: row.name, dose: row.dose, daily: row.daily, days: row.days,
+      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: null
+    });
+    if (selectedRxIndex >= rxData.length) selectedRxIndex = Math.max(0, rxData.length - 1);
+    showToast('"' + row.name + '" → 미래 예약처방으로 이동');
+  } else if (srcType === 'future' && targetType === 'rx') {
+    // Move from future reservations to today orders (convert to regular rx)
+    var res = reservationData[srcIdx];
+    if (res) {
+      var rect2 = e.currentTarget.getBoundingClientRect();
+      var insertAt = e.clientY < rect2.top + rect2.height / 2 ? targetIndex : targetIndex + 1;
+      rxData.splice(insertAt, 0, {
+        code: res.code, name: res.name, dose: res.dose, daily: res.daily, days: res.days,
+        usage: '', extra: '', claim: '', isReservation: false, reserveDate: null
+      });
+      reservationData.splice(srcIdx, 1);
+      selectedRxIndex = insertAt;
+      selectedFuture.clear();
+      showToast('"' + res.name + '" → 오늘 오더로 이동');
+    }
+  } else if (srcType === 'future' && targetType === 'future') {
+    // Reorder future reservations (optional, just show toast)
+    showToast('미래 예약 내 순서는 날짜 기준으로 정렬됩니다.');
+  }
+
+  renderRxTable();
+  renderReservationTable();
+  dragSource = null;
+}
+
+// ===== Save Chart → Generate Visit History =====
+function saveChart() {
+  var visitList = document.getElementById('visitList');
+  var emptyEl = document.getElementById('visitEmpty');
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Collect today's orders only (nurse + regular rx), NOT future reservations
+  var todayOrders = [];
+  // Nurse order (static)
+  todayOrders.push({ code: 'ns500', name: '생리식염수500ml', dose: '1/1/1', color: '#EAB308' });
+  // Regular rxData
+  rxData.forEach(function(row) {
+    todayOrders.push({ code: row.code, name: row.name, dose: row.dose + '/' + row.daily + '/' + row.days, color: '#374151' });
+  });
+
+  // Build visit card HTML
+  var rxHtml = '';
+  todayOrders.forEach(function(o) {
+    rxHtml += '<div class="visit-rx-row"><span style="color:' + o.color + ';">💊</span><span class="rx-code">' + o.code + '</span><span class="rx-name">' + o.name + '</span><span class="rx-dose">' + o.dose + '</span></div>';
+  });
+
+  var cardHtml = '<div class="visit-card expanded">' +
+    '<div class="visit-row">' +
+      '<span class="v-date">26.03.16</span>' +
+      '<span class="v-doctor">카야</span>' +
+      '<span class="v-diag">본태성 고혈압</span>' +
+      '<span class="v-chevron">▲</span>' +
+    '</div>' +
+    '<div class="visit-tags">' +
+      '<span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span>' +
+      (todayOrders.length > 0 ? '<span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">주</span>' : '') +
+      '<span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span>' +
+      '<span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span>' +
+    '</div>' +
+    '<div class="visit-expanded">' +
+      '<div class="visit-section">' +
+        '<div class="visit-section-header">증상</div>' +
+        '<div class="visit-section-body" style="color:#374151;">복통, 속쓰림, 소화불량</div>' +
+      '</div>' +
+      '<div class="visit-section">' +
+        '<div class="visit-section-header">진단</div>' +
+        '<div class="visit-section-body">' +
+          '<div style="display:flex;gap:6px;align-items:center;padding:2px 0;"><span style="color:#2563EB;">●</span><span style="font-weight:500;">I10</span> 본태성 고혈압 (주상병)</div>' +
+          '<div style="display:flex;gap:6px;align-items:center;padding:2px 0;"><span style="color:#9CA3AF;">○</span><span style="font-weight:500;">E11</span> 2형 당뇨병 (부상병)</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="visit-section">' +
+        '<div class="visit-section-header">처방 (' + todayOrders.length + ')</div>' +
+        '<div class="visit-section-body" style="display:flex;flex-direction:column;gap:2px;">' + rxHtml + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // Past visits (static, always shown after save)
+  var pastHtml = '<div class="visit-card">' +
+    '<div class="visit-row"><span class="v-date">26.03.04</span><span class="v-doctor">카야</span><span class="v-diag">상세불명의 복통</span><span class="v-chevron">▼</span></div>' +
+    '<div class="visit-tags"><span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">주</span><span class="visit-tag" style="background:#FEF3C7;color:#92400E;">검</span><span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span></div>' +
+    '<div class="visit-summary">복통 및 소화불량 증상으로 내원, 수액/비타민 주사 처방</div>' +
+  '</div>' +
+  '<div class="visit-card">' +
+    '<div class="visit-row"><span class="v-date">26.02.15</span><span class="v-doctor">카야</span><span class="v-diag">본태성 고혈압</span><span class="v-chevron">▼</span></div>' +
+    '<div class="visit-tags"><span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span><span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span></div>' +
+    '<div class="visit-summary">고혈압/당뇨 정기 진료</div>' +
+  '</div>';
+
+  visitList.innerHTML = cardHtml + pastHtml;
+  showToast('저장되었습니다. 내원이력이 생성되었습니다.');
+}
 
 // ===== Init =====
 renderRxTable();
