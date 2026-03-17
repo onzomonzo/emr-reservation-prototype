@@ -80,6 +80,9 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr:hover { background: #F9FAFB; }
 .data-table tr.selected { background: #EBF5FF; }
 .data-table tr.selected td:first-child { border-left: 3px solid #3B82F6; }
+.data-table tr.nurse-reservation { background: #FEFCE8; }
+.data-table tr.nurse-reservation td:first-child { border-left: 3px solid #EAB308; }
+.data-table tr.nurse-reservation td { color: #854D0E; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
 .data-table tr.future-reservation { background: #DBEAFE; cursor: pointer; }
@@ -468,6 +471,13 @@ function formatDate(d) {
 function renderRxTable() {
   var tbody = document.getElementById('rxBody');
   tbody.innerHTML = '';
+
+  // Nurse-ordered reservation at very top
+  var nurseTr = document.createElement('tr');
+  nurseTr.className = 'nurse-reservation';
+  nurseTr.innerHTML = '<td>ns500</td><td>생리식염수500ml</td>' +
+    '<td>1</td><td>1</td><td>1</td><td>IV</td><td></td><td></td>';
+  tbody.appendChild(nurseTr);
 
   // Today's reservations at top
   var todayStr = formatDate(today);
