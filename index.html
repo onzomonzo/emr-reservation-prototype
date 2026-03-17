@@ -80,10 +80,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr:hover { background: #F9FAFB; }
 .data-table tr.selected { background: #EBF5FF; }
 .data-table tr.selected td:first-child { border-left: 3px solid #3B82F6; }
-.data-table tr.nurse-reservation { background: #FEFCE8; }
-.data-table tr.nurse-reservation td:first-child { border-left: 3px solid #EAB308; }
-.data-table tr.nurse-reservation td { color: #854D0E; }
-.nurse-badge { display:inline-block; font-size:9px; font-weight:700; background:#FDE047; color:#854D0E; padding:1px 5px; border-radius:3px; margin-left:6px; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
 .data-table tr.future-reservation { background: #DBEAFE; cursor: pointer; }
@@ -100,9 +96,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .future-ctx-item.danger { color: #EF4444; }
 .future-ctx-sep { border-top: 1px solid #E5E7EB; margin: 2px 0; }
 
-.rx-icon { text-align: center; width: 24px; }
-.tri-icon { font-size: 8px; color: #F59E0B; }
-.reservation-icon { font-size: 10px; color: #F97316; }
 
 /* Section separator */
 .section-sep { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #F8F9FA; border-bottom: 1px solid #E5E7EB; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; font-weight: 500; }
@@ -280,7 +273,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
       <div class="section-table flex-1" style="position:relative;">
         <div class="rx-table-wrapper">
           <table class="data-table" id="mainRxTable"><thead><tr>
-            <th style="width:24px;"></th><th style="width:60px;">코드</th><th style="min-width:160px;">명칭</th>
+            <th style="width:60px;">코드</th><th style="min-width:160px;">명칭</th>
             <th style="width:36px;">용량</th><th style="width:36px;">일투</th><th style="width:36px;">일수</th>
             <th style="width:36px;">용법</th><th style="width:40px;">예외</th><th style="width:36px;">청구</th>
           </tr></thead>
@@ -476,14 +469,6 @@ function renderRxTable() {
   var tbody = document.getElementById('rxBody');
   tbody.innerHTML = '';
 
-  // Nurse-ordered reservation at very top
-  var nurseTr = document.createElement('tr');
-  nurseTr.className = 'nurse-reservation';
-  nurseTr.innerHTML = '<td class="rx-icon"><span style="font-size:11px;">💉</span></td>' +
-    '<td>ns500</td><td>생리식염수500ml <span class="nurse-badge">간호예약</span></td>' +
-    '<td>1</td><td>1</td><td>1</td><td>IV</td><td></td><td></td>';
-  tbody.appendChild(nurseTr);
-
   // Today's reservations at top
   var todayStr = formatDate(today);
   var todayReservations = reservationData.filter(function(r) { return r.performDate === todayStr.replace('2026-','26.').replace(/-/g,'.'); });
@@ -491,8 +476,7 @@ function renderRxTable() {
   todayReservations.forEach(function(r) {
     var tr = document.createElement('tr');
     tr.className = 'today-reservation';
-    tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
-      '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span></td>' +
+    tr.innerHTML = '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span></td>' +
       '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
     tbody.appendChild(tr);
   });
@@ -504,13 +488,10 @@ function renderRxTable() {
     tr.onclick = function() { selectedRxIndex = i; renderRxTable(); };
     tr.oncontextmenu = function(e) { e.preventDefault(); selectedRxIndex = i; renderRxTable(); showCtxMenu(e.clientX, e.clientY, i); };
     var nameHtml = row.name;
-    var iconHtml = '<span class="tri-icon">▲</span>';
     if (row.isReservation) {
       nameHtml += ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span>';
-      iconHtml = '<span class="reservation-icon">📅</span>';
     }
-    tr.innerHTML = '<td class="rx-icon">' + iconHtml + '</td>' +
-      '<td>' + row.code + '</td><td>' + nameHtml + '</td>' +
+    tr.innerHTML = '<td>' + row.code + '</td><td>' + nameHtml + '</td>' +
       '<td>' + row.dose + '</td><td>' + row.daily + '</td><td>' + row.days + '</td>' +
       '<td>' + (row.usage || '') + '</td><td>' + (row.extra || '') + '</td><td>' + (row.claim || '') + '</td>';
     tbody.appendChild(tr);
@@ -544,8 +525,7 @@ function renderRxTable() {
         }
         showFutureCtx(e.clientX, e.clientY);
       };
-      tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
-        '<td>' + r.code + '</td><td>' + r.name + '</td>' +
+      tr.innerHTML = '<td>' + r.code + '</td><td>' + r.name + '</td>' +
         '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
       tbody.appendChild(tr);
     });
