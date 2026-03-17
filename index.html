@@ -1027,19 +1027,7 @@ function saveChart() {
     '</div>' +
   '</div>';
 
-  // Past visits (static, always shown after save)
-  var pastHtml = '<div class="visit-card">' +
-    '<div class="visit-row"><span class="v-date">26.03.04</span><span class="v-doctor">카야</span><span class="v-diag">상세불명의 복통</span><span class="v-chevron">▼</span></div>' +
-    '<div class="visit-tags"><span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">주</span><span class="visit-tag" style="background:#FEF3C7;color:#92400E;">검</span><span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span></div>' +
-    '<div class="visit-summary">복통 및 소화불량 증상으로 내원, 수액/비타민 주사 처방</div>' +
-  '</div>' +
-  '<div class="visit-card">' +
-    '<div class="visit-row"><span class="v-date">26.02.15</span><span class="v-doctor">카야</span><span class="v-diag">본태성 고혈압</span><span class="v-chevron">▼</span></div>' +
-    '<div class="visit-tags"><span class="visit-tag" style="background:#D1FAE5;color:#059669;">재</span><span class="visit-tag" style="background:#DBEAFE;color:#2563EB;">약</span><span class="visit-tag" style="background:#F3F4F6;color:#6B7280;">일반</span></div>' +
-    '<div class="visit-summary">고혈압/당뇨 정기 진료</div>' +
-  '</div>';
-
-  visitList.innerHTML = cardHtml + pastHtml;
+  visitList.innerHTML = cardHtml;
   showToast('저장되었습니다. 내원이력이 생성되었습니다.');
 }
 
