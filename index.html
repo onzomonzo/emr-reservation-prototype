@@ -115,15 +115,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-footer { padding: 8px 16px; border-top: 1px solid #E5E7EB; display: flex; align-items: center; gap: 8px; }
 
-/* === Bottom Tabs === */
-.bottom-tabs-area { border-top: 1px solid #E5E7EB; background: #fff; display: flex; flex-direction: column; }
-.bottom-tab-bar { display: flex; align-items: center; gap: 0; border-bottom: 1px solid #E5E7EB; padding: 0 8px; }
-.bottom-tab { padding: 8px 14px; font-size: 11px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; position: relative; }
-.bottom-tab:hover { color: #374151; background: #F9FAFB; }
-.bottom-tab.active { color: #7C3AED; font-weight: 600; border-bottom-color: #7C3AED; }
-.bottom-tab .tab-badge-count { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #EF4444; color: #fff; font-size: 9px; font-weight: 700; margin-left: 4px; }
-.bottom-tab-content { display: none; flex: 1; min-height: 0; overflow: auto; }
-.bottom-tab-content.active { display: flex; flex-direction: column; }
 
 /* === Reservation Tab Content === */
 .reservation-list { flex: 1; overflow-y: auto; }
@@ -212,8 +203,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .toast.show { display: block; animation: toastIn 0.3s ease-out; }
 @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
-/* Bottom tab fixed height */
-.bottom-tabs-area { height: 240px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -327,24 +316,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
       </div>
     </div>
 
-    <!-- Bottom Tabs Area -->
-    <div class="bottom-tabs-area">
-      <div class="bottom-tab-bar">
-        <div class="bottom-tab active" onclick="switchBottomTab('orders')" id="btab-orders">조제내요</div>
-        <div class="bottom-tab" onclick="openReservationPopup()" id="btab-reservation" style="cursor:pointer;">예약처방 <span class="tab-badge-count" id="reservationBadge">4</span></div>
-        <div class="bottom-tab" onclick="switchBottomTab('special')" id="btab-special">특정내역</div>
-        <div class="bottom-tab" onclick="switchBottomTab('memo')" id="btab-memo">예약메모</div>
-      </div>
-      <div class="bottom-tab-content active" id="btcontent-orders">
-        <div style="padding:12px;color:#9CA3AF;font-size:11px;">조제내요 내용이 표시됩니다.</div>
-      </div>
-      <div class="bottom-tab-content" id="btcontent-special">
-        <div style="padding:12px;color:#9CA3AF;font-size:11px;">특정내역 내용이 표시됩니다.</div>
-      </div>
-      <div class="bottom-tab-content" id="btcontent-memo">
-        <div style="padding:12px;color:#9CA3AF;font-size:11px;">예약메모 입력란입니다. 예약메모 입력란의 내용은 통합으로도 나올 것</div>
-      </div>
-    </div>
   </div>
 
   <!-- Column 3: Bundle Prescription -->
@@ -605,12 +576,6 @@ function closeReservationPopup() {
 }
 
 // ===== Bottom Tab Switching =====
-function switchBottomTab(tab) {
-  document.querySelectorAll('.bottom-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.bottom-tab-content').forEach(function(c) { c.classList.remove('active'); });
-  document.getElementById('btab-' + tab).classList.add('active');
-  document.getElementById('btcontent-' + tab).classList.add('active');
-}
 
 // ===== Calendar =====
 function openCalendar(e, index) {
