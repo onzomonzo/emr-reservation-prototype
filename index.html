@@ -131,7 +131,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .date-cell.no-date { color: #9CA3AF; text-decoration: none; font-weight: 400; }
 
 /* === Calendar Dropdown === */
-.calendar-dropdown { display: none; position: absolute; z-index: 2000; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 300px; }
+.calendar-dropdown { display: none; position: fixed; z-index: 4000; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 300px; }
 .calendar-dropdown.open { display: block; }
 .cal-quick-btns { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; }
 .cal-quick-btn { padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; font-size: 10px; cursor: pointer; color: #374151; white-space: nowrap; }
@@ -491,8 +491,14 @@ function renderRxTable() {
     if (i === selectedRxIndex) tr.className = 'selected';
     tr.onclick = function() { selectedRxIndex = i; renderRxTable(); };
     tr.oncontextmenu = function(e) { e.preventDefault(); selectedRxIndex = i; renderRxTable(); showCtxMenu(e.clientX, e.clientY, i); };
-    tr.innerHTML = '<td class="rx-icon"><span class="tri-icon">▲</span></td>' +
-      '<td>' + row.code + '</td><td>' + row.name + '</td>' +
+    var nameHtml = row.name;
+    var iconHtml = '<span class="tri-icon">▲</span>';
+    if (row.isReservation && row.reserveDate) {
+      nameHtml += ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약 ' + row.reserveDate + '</span>';
+      iconHtml = '<span class="reservation-icon">📅</span>';
+    }
+    tr.innerHTML = '<td class="rx-icon">' + iconHtml + '</td>' +
+      '<td>' + row.code + '</td><td>' + nameHtml + '</td>' +
       '<td>' + row.dose + '</td><td>' + row.daily + '</td><td>' + row.days + '</td>' +
       '<td>' + (row.usage || '') + '</td><td>' + (row.extra || '') + '</td><td>' + (row.claim || '') + '</td>';
     tbody.appendChild(tr);
