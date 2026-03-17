@@ -539,7 +539,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
   <div class="ctx-menu-item" onclick="ctxAction('deleteAll')"><span class="ctx-icon">✕</span> 전체삭제</div>
   <div class="ctx-sep"></div>
   <div class="ctx-menu-item" onclick="ctxAction('prn')"><span class="ctx-icon">↻</span> PRN으로 처방</div>
-  <div class="ctx-menu-item reservation-item" onclick="ctxAction('reserve')"><span class="ctx-icon">📅</span> 예약처방</div>
+  <div class="ctx-menu-item reservation-item" onclick="ctxAction('reserve')"><span class="ctx-icon">📅</span> 예약처방으로 이동 ↓</div>
 </div>
 
 <!-- Future reservation context menu -->
@@ -839,14 +839,26 @@ function ctxAction(action) {
   closeCtxMenu();
   if (action === 'reserve' && ctxTargetIndex >= 0) {
     var row = rxData[ctxTargetIndex];
+    // Calculate next business day as default future date
+    var futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + 1);
+    while (futureDate.getDay() === 0) futureDate.setDate(futureDate.getDate() + 1);
+    var futureDateStr = formatDate(futureDate).substring(2).replace(/-/g, '.');
+    // Add to reservation data with future date (shows in blue area)
+    var newIdx = reservationData.length;
     reservationData.push({
       code: row.code, name: row.name, dose: row.dose, daily: row.daily, days: row.days,
-      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: null
+      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: futureDateStr
     });
-    renderReservationTable();
+    // Remove from regular orders
+    rxData.splice(ctxTargetIndex, 1);
+    if (selectedRxIndex >= rxData.length) selectedRxIndex = Math.max(0, rxData.length - 1);
+    // Select the newly added future reservation to highlight it
+    selectedFuture.clear();
+    selectedFuture.add(newIdx);
     renderRxTable();
-    openReservationPopup();
-    showToast('"' + row.name + '" 예약처방이 추가되었습니다.');
+    renderReservationTable();
+    showToast('"' + row.name + '" 이(가) 미래 예약처방으로 이동되었습니다. (' + futureDateStr + ')');
   } else if (action === 'delete' && ctxTargetIndex >= 0) {
     rxData.splice(ctxTargetIndex, 1);
     renderRxTable();
