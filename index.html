@@ -80,6 +80,10 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr:hover { background: #F9FAFB; }
 .data-table tr.selected { background: #EBF5FF; }
 .data-table tr.selected td:first-child { border-left: 3px solid #3B82F6; }
+.data-table tr.nurse-reservation { background: #FEFCE8; }
+.data-table tr.nurse-reservation td:first-child { border-left: 3px solid #EAB308; }
+.data-table tr.nurse-reservation td { color: #854D0E; }
+.nurse-badge { display:inline-block; font-size:9px; font-weight:700; background:#FDE047; color:#854D0E; padding:1px 5px; border-radius:3px; margin-left:6px; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
 .data-table tr.future-reservation { background: #DBEAFE; cursor: pointer; }
@@ -472,6 +476,14 @@ function renderRxTable() {
   var tbody = document.getElementById('rxBody');
   tbody.innerHTML = '';
 
+  // Nurse-ordered reservation at very top
+  var nurseTr = document.createElement('tr');
+  nurseTr.className = 'nurse-reservation';
+  nurseTr.innerHTML = '<td class="rx-icon"><span style="font-size:11px;">💉</span></td>' +
+    '<td>ns500</td><td>생리식염수500ml <span class="nurse-badge">간호예약</span></td>' +
+    '<td>1</td><td>1</td><td>1</td><td>IV</td><td></td><td></td>';
+  tbody.appendChild(nurseTr);
+
   // Today's reservations at top
   var todayStr = formatDate(today);
   var todayReservations = reservationData.filter(function(r) { return r.performDate === todayStr.replace('2026-','26.').replace(/-/g,'.'); });
@@ -493,8 +505,8 @@ function renderRxTable() {
     tr.oncontextmenu = function(e) { e.preventDefault(); selectedRxIndex = i; renderRxTable(); showCtxMenu(e.clientX, e.clientY, i); };
     var nameHtml = row.name;
     var iconHtml = '<span class="tri-icon">▲</span>';
-    if (row.isReservation && row.reserveDate) {
-      nameHtml += ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약 ' + row.reserveDate + '</span>';
+    if (row.isReservation) {
+      nameHtml += ' <span style="font-size:9px;color:#F97316;font-weight:600;">예약</span>';
       iconHtml = '<span class="reservation-icon">📅</span>';
     }
     tr.innerHTML = '<td class="rx-icon">' + iconHtml + '</td>' +
@@ -533,7 +545,7 @@ function renderRxTable() {
         showFutureCtx(e.clientX, e.clientY);
       };
       tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
-        '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;font-weight:500;">' + r.performDate + '</span></td>' +
+        '<td>' + r.code + '</td><td>' + r.name + '</td>' +
         '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
       tbody.appendChild(tr);
     });
