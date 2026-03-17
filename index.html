@@ -82,8 +82,19 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 .data-table tr.selected td:first-child { border-left: 3px solid #3B82F6; }
 .data-table tr.today-reservation { background: #FFF7ED; }
 .data-table tr.today-reservation td:first-child { border-left: 3px solid #F97316; }
-.data-table tr.future-reservation { background: #DBEAFE; }
+.data-table tr.future-reservation { background: #DBEAFE; cursor: pointer; }
 .data-table tr.future-reservation td { color: #1E40AF; }
+.data-table tr.future-reservation.future-selected { background: #93C5FD; }
+.data-table tr.future-reservation.future-selected td:first-child { border-left: 3px solid #1E40AF; }
+
+/* Future reservation context menu */
+.future-ctx { position: fixed; display: none; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 2000; min-width: 140px; padding: 4px 0; }
+.future-ctx.open { display: block; }
+.future-ctx-item { display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 11px; cursor: pointer; }
+.future-ctx-item:hover { background: #F3F4F6; }
+.future-ctx-item.primary { color: #1E40AF; font-weight: 500; }
+.future-ctx-item.danger { color: #EF4444; }
+.future-ctx-sep { border-top: 1px solid #E5E7EB; margin: 2px 0; }
 
 .rx-icon { text-align: center; width: 24px; }
 .tri-icon { font-size: 8px; color: #F59E0B; }
@@ -441,6 +452,13 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
   <div class="ctx-menu-item reservation-item" onclick="ctxAction('reserve')"><span class="ctx-icon">📅</span> 예약처방</div>
 </div>
 
+<!-- Future reservation context menu -->
+<div class="future-ctx" id="futureCtx">
+  <div class="future-ctx-item primary" onclick="addFutureToRx()">➕ 처방에 추가</div>
+  <div class="future-ctx-sep"></div>
+  <div class="future-ctx-item danger" onclick="deleteFutureRes()">✕ 예약 삭제</div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -466,6 +484,7 @@ var calYear = 2026, calMonth = 2; // March (0-indexed)
 var calTargetIndex = -1;
 var ctxTargetIndex = -1;
 var selectedRes = new Set();
+var selectedFuture = new Set(); // indices into futureRes array
 var selectedRxIndex = 0; // default selected row
 
 // Hospital holidays (Sundays + specific dates)
@@ -508,14 +527,34 @@ function renderRxTable() {
     tbody.appendChild(tr);
   });
 
-  // Future reservations (blue background, no label)
+  // Future reservations (blue background, selectable)
   var futureRes = reservationData.filter(function(r) {
     return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
   });
   if (futureRes.length > 0) {
-    futureRes.forEach(function(r) {
+    futureRes.forEach(function(r, fi) {
+      var origIdx = reservationData.indexOf(r);
       var tr = document.createElement('tr');
-      tr.className = 'future-reservation';
+      tr.className = 'future-reservation' + (selectedFuture.has(origIdx) ? ' future-selected' : '');
+      tr.onclick = function(e) {
+        if (e.ctrlKey || e.metaKey) {
+          if (selectedFuture.has(origIdx)) selectedFuture.delete(origIdx);
+          else selectedFuture.add(origIdx);
+        } else {
+          selectedFuture.clear();
+          selectedFuture.add(origIdx);
+        }
+        renderRxTable();
+      };
+      tr.oncontextmenu = function(e) {
+        e.preventDefault();
+        if (!selectedFuture.has(origIdx)) {
+          if (!e.ctrlKey && !e.metaKey) selectedFuture.clear();
+          selectedFuture.add(origIdx);
+          renderRxTable();
+        }
+        showFutureCtx(e.clientX, e.clientY);
+      };
       tr.innerHTML = '<td class="rx-icon"><span class="reservation-icon">📅</span></td>' +
         '<td>' + r.code + '</td><td>' + r.name + ' <span style="font-size:9px;font-weight:500;">' + r.performDate + '</span></td>' +
         '<td>' + r.dose + '</td><td>' + r.daily + '</td><td>' + r.days + '</td><td></td><td></td><td></td>';
@@ -715,6 +754,46 @@ function ctxAction(action) {
   }
 }
 
+// ===== Future Reservation Context Menu =====
+function showFutureCtx(x, y) {
+  closeFutureCtx();
+  var menu = document.getElementById('futureCtx');
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.classList.add('open');
+}
+function closeFutureCtx() {
+  document.getElementById('futureCtx').classList.remove('open');
+}
+
+function addFutureToRx() {
+  closeFutureCtx();
+  var count = 0;
+  var indices = Array.from(selectedFuture).sort(function(a,b){return b-a;});
+  indices.forEach(function(idx) {
+    var r = reservationData[idx];
+    if (r) {
+      rxData.push({ code: r.code, name: r.name, dose: r.dose, daily: r.daily, days: r.days, usage: '', extra: '', claim: '', isReservation: true, reserveDate: r.performDate });
+      reservationData.splice(idx, 1);
+      count++;
+    }
+  });
+  selectedFuture.clear();
+  renderRxTable();
+  renderReservationTable();
+  showToast(count + '개 예약처방이 오늘 처방에 추가되었습니다.');
+}
+
+function deleteFutureRes() {
+  closeFutureCtx();
+  var indices = Array.from(selectedFuture).sort(function(a,b){return b-a;});
+  indices.forEach(function(idx) { reservationData.splice(idx, 1); });
+  selectedFuture.clear();
+  renderRxTable();
+  renderReservationTable();
+  showToast('예약처방이 삭제되었습니다.');
+}
+
 // ===== Reservation Selection =====
 function toggleResCheck(index, el) {
   if (el.checked) selectedRes.add(index);
@@ -763,6 +842,7 @@ function showToast(msg) {
 // ===== Click outside to close =====
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ctx-menu') && !e.target.closest('tr')) closeCtxMenu();
+  if (!e.target.closest('.future-ctx') && !e.target.closest('.future-reservation')) closeFutureCtx();
   if (!e.target.closest('.calendar-dropdown') && !e.target.closest('.date-cell')) closeCalendar();
   if (e.target.classList.contains('modal-overlay')) closeReservationPopup();
 });
