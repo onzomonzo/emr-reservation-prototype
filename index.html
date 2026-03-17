@@ -476,7 +476,7 @@ var rxData = [
 
 var reservationData = [
   { code: 'dcts23', name: '이런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.17' },
-  { code: 'a1', name: '자런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.18' },
+  { code: 'a1', name: '저런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.18' },
   { code: 'af12', name: '판검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.19' },
   { code: 'asf', name: '부장검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.20' },
 ];
@@ -486,7 +486,7 @@ var calTargetIndex = -1;
 var ctxTargetIndex = -1;
 var selectedRes = new Set();
 var selectedFuture = new Set(); // indices into futureRes array
-var selectedRxIndex = 0; // default selected row
+var selectedRxIndex = -1; // no default selected row
 
 // Hospital holidays (Sundays + specific dates)
 var holidays = ['2026-03-01'];
