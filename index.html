@@ -29,8 +29,11 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
 /* === Rx Footer (inside Column 2) === */
 .rx-footer { border-top: 1px solid #E5E7EB; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #fff; }
 .rx-action-row { display: flex; align-items: center; gap: 12px; }
-.rx-action-item { font-size: 11px; color: #6B7280; cursor: pointer; }
+.rx-action-item { font-size: 11px; color: #6B7280; cursor: pointer; position: relative; }
 .rx-action-item:hover { color: #374151; }
+.rx-action-item.has-reservations { color: #7C3AED; font-weight: 600; }
+.rx-action-item.has-reservations:hover { color: #6D28D9; }
+.res-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px; background: #7C3AED; color: #fff; font-size: 9px; font-weight: 700; margin-left: 4px; vertical-align: middle; line-height: 1; }
 .rx-price-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 .rx-button-row { display: flex; align-items: center; justify-content: space-between; }
 .rx-btn-left { display: flex; align-items: center; gap: 6px; }
@@ -321,7 +324,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Pretendard', sa
       <div class="rx-footer">
         <div class="rx-action-row">
           <span class="rx-action-item">📄 조제메모</span>
-          <span class="rx-action-item" onclick="openReservationPopup()" style="cursor:pointer;">📅 예약처방</span>
+          <span class="rx-action-item" id="reservationMenuBtn" onclick="openReservationPopup()" style="cursor:pointer;">📅 예약처방<span id="reservationBadgeCount" class="res-badge" style="display:none;"></span></span>
           <span class="rx-action-item">📋 특정내역</span>
           <span class="rx-action-item">👤 환자예의</span>
           <span class="rx-action-item">🚫 처방금지</span>
@@ -618,6 +621,27 @@ function renderRxTable() {
   };
   dropZoneTr.ondrop = function(e) { handleDrop(e, 'dropzone', -1); dropZoneTr.style.background = ''; };
   tbody.appendChild(dropZoneTr);
+
+  // Update reservation menu button badge
+  updateReservationBadge();
+}
+
+function updateReservationBadge() {
+  var todayStr = formatDate(today);
+  var futureCount = reservationData.filter(function(r) {
+    return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
+  }).length;
+  var totalCount = reservationData.length;
+  var btn = document.getElementById('reservationMenuBtn');
+  var badge = document.getElementById('reservationBadgeCount');
+  if (totalCount > 0) {
+    btn.classList.add('has-reservations');
+    badge.style.display = 'inline-flex';
+    badge.textContent = totalCount;
+  } else {
+    btn.classList.remove('has-reservations');
+    badge.style.display = 'none';
+  }
 }
 
 // ===== Render Reservation Table =====
