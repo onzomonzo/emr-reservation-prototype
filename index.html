@@ -562,7 +562,8 @@ function renderReservationTable() {
     tbody.appendChild(tr);
   });
 
-  document.getElementById('reservationBadge').textContent = reservationData.length;
+  var badge = document.getElementById('reservationBadge');
+  if (badge) badge.textContent = reservationData.length;
   document.getElementById('reservationCount').textContent = reservationData.length + '건';
 }
 
