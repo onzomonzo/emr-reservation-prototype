@@ -478,8 +478,10 @@ var rxData = [
 ];
 
 var reservationData = [
-  { code: 'af12', name: '판검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '25.08.12' },
-  { code: 'asf', name: '부장검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '25.08.12' },
+  { code: 'dcts23', name: '이런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.17' },
+  { code: 'a1', name: '자런검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.18' },
+  { code: 'af12', name: '판검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.19' },
+  { code: 'asf', name: '부장검사', dose: '1', daily: '1', days: '1', insPrice: '23,000', genPrice: '23,000', regDate: '25.08.12', regBy: '김의사', performDate: '26.03.20' },
 ];
 
 var calYear = 2026, calMonth = 2; // March (0-indexed)
@@ -629,13 +631,12 @@ function updateReservationBadge() {
   var futureCount = reservationData.filter(function(r) {
     return r.performDate && r.performDate !== todayStr.replace('2026-','26.').replace(/-/g,'.');
   }).length;
-  var totalCount = reservationData.length;
   var btn = document.getElementById('reservationMenuBtn');
   var badge = document.getElementById('reservationBadgeCount');
-  if (totalCount > 0) {
+  if (futureCount > 0) {
     btn.classList.add('has-reservations');
     badge.style.display = 'inline-flex';
-    badge.textContent = totalCount;
+    badge.textContent = futureCount;
   } else {
     btn.classList.remove('has-reservations');
     badge.style.display = 'none';
