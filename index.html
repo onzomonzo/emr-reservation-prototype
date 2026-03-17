@@ -504,8 +504,8 @@ function renderRxTable() {
   // Nurse-ordered reservation at very top
   var nurseTr = document.createElement('tr');
   nurseTr.className = 'nurse-reservation';
-  nurseTr.innerHTML = '<td>ns500</td><td>생리식염수500ml</td>' +
-    '<td>1</td><td>1</td><td>1</td><td>IV</td><td></td><td></td>';
+  nurseTr.innerHTML = '<td>hrv01</td><td>HRV(자율신경계검사)</td>' +
+    '<td>1</td><td>1</td><td>1</td><td></td><td></td><td></td>';
   tbody.appendChild(nurseTr);
 
   // Today's reservations at top
@@ -983,7 +983,7 @@ function saveChart() {
   // Collect today's orders only (nurse + regular rx), NOT future reservations
   var todayOrders = [];
   // Nurse order (static)
-  todayOrders.push({ code: 'ns500', name: '생리식염수500ml', dose: '1/1/1', color: '#EAB308' });
+  todayOrders.push({ code: 'hrv01', name: 'HRV(자율신경계검사)', dose: '1/1/1', color: '#EAB308' });
   // Regular rxData
   rxData.forEach(function(row) {
     todayOrders.push({ code: row.code, name: row.name, dose: row.dose + '/' + row.daily + '/' + row.days, color: '#374151' });
