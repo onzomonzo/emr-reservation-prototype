@@ -850,7 +850,7 @@ function addFutureToRx() {
   indices.forEach(function(idx) {
     var r = reservationData[idx];
     if (r) {
-      rxData.push({ code: r.code, name: r.name, dose: r.dose, daily: r.daily, days: r.days, usage: '', extra: '', claim: '', isReservation: true, reserveDate: r.performDate });
+      rxData.push({ code: r.code, name: r.name, dose: r.dose, daily: r.daily, days: r.days, usage: '', extra: '', claim: '', isReservation: false, reserveDate: null });
       reservationData.splice(idx, 1);
       count++;
     }
