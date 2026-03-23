@@ -805,18 +805,21 @@ function ctxAction(action) {
   closeCtxMenu();
   if (action === 'reserve' && ctxTargetIndex >= 0) {
     var row = rxData[ctxTargetIndex];
-    // Add to reservation data with no date (설정안함)
+    // Set default future date (next business day)
+    var futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + 1);
+    while (futureDate.getDay() === 0) futureDate.setDate(futureDate.getDate() + 1);
+    var futureDateStr = formatDate(futureDate).substring(2).replace(/-/g, '.');
     reservationData.push({
       code: row.code, name: row.name, dose: row.dose, daily: row.daily, days: row.days,
-      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: null
+      insPrice: '23,000', genPrice: '23,000', regDate: '26.03.16', regBy: '카야', performDate: futureDateStr
     });
     // Remove from regular orders
     rxData.splice(ctxTargetIndex, 1);
     if (selectedRxIndex >= rxData.length) selectedRxIndex = Math.max(0, rxData.length - 1);
     renderRxTable();
     renderReservationTable();
-    openReservationPopup();
-    showToast('"' + row.name + '" 이(가) 예약처방에 추가되었습니다. (날짜 미설정)');
+    showToast('"' + row.name + '" → 미래 예약처방으로 이동');
   } else if (action === 'delete' && ctxTargetIndex >= 0) {
     rxData.splice(ctxTargetIndex, 1);
     renderRxTable();
